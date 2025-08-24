@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unlove Carnage</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background: #2e003e; /* freak dark purple */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .banner {
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      margin-top: 20px;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .button {
+      padding: 15px 30px;
+      font-size: 18px;
+      font-weight: bold;
+      background: #87CEFA; /* light blue */
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+    .button:hover {
+      background: #5DADE2;
+    }
+
+    /* Video thumbnail container */
+    .video-container {
+      position: relative;
+      width: 100%;
+      padding-bottom: 56.25%; /* 16:9 aspect ratio */
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      cursor: pointer;
+    }
+
+    .video-thumbnail {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .play-button {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      background: rgba(0,0,0,0.6);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+    }
+    .play-button:hover {
+      background: rgba(0,0,0,0.8);
+    }
+    .play-button:before {
+      content: '';
+      display: block;
+      margin-left: 6px;
+      width: 0;
+      height: 0;
+      border-left: 30px solid white;
+      border-top: 18px solid transparent;
+      border-bottom: 18px solid transparent;
+    }
+
+    iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: none; /* hidden until play */
+    }
+  </style>
+</head>
+<body>
+  <!-- Banner image -->
+  <img src="mf.jpg" alt="Unlove Carnage" class="banner">
+
+  <div class="content">
+    <a class="button" href="https://www.melbournefringe.com.au/whats-on/events/jimmy-rice-presents-sunny-jim-in-the-unloved-carnage-of-my-past-relationships#sessions-book-now" target="_blank">Buy Tickets</a>
+
+    <!-- Click-to-play YouTube video -->
+    <div class="video-container" id="videoBox">
+      <!-- Thumbnail from YouTube -->
+      <img class="video-thumbnail" src="https://img.youtube.com/vi/Ehyp7VheIxw/hqdefault.jpg" alt="Unlove Carnage Video">
+      <!-- Play button -->
+      <div class="play-button"></div>
+      <!-- YouTube Embed -->
+      <iframe id="videoFrame"
+        src="https://www.youtube.com/embed/Ehyp7VheIxw?autoplay=1"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </div>
+
+  <script>
+    const videoBox = document.getElementById('videoBox');
+    const iframe = document.getElementById('videoFrame');
+
+    videoBox.addEventListener('click', () => {
+      iframe.style.display = 'block';
+      videoBox.querySelector('.video-thumbnail').style.display = 'none';
+      videoBox.querySelector('.play-button').style.display = 'none';
+    });
+  </script>
+</body>
+</html>
