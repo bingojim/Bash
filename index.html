@@ -1772,6 +1772,15 @@ function getStateName(stateIndex) {
 }
 
 function eliminatePlayer(playerIndex) {
+    // Count actual pieces on board
+    const actualPiecesOnBoard = players[playerIndex].pieces.filter(p => p.isOnBoard).length;
+    
+    // Only eliminate if player truly has 0 or 1 pieces left
+    if (actualPiecesOnBoard > 1) {
+        console.log(`Not eliminating player ${playerIndex} - they still have ${actualPiecesOnBoard} pieces on board`);
+        return;
+    }
+    
     players[playerIndex].pieces.forEach(piece => {
         if (piece.isOnBoard) {
             piece.isOnBoard = false;
@@ -1787,7 +1796,6 @@ function eliminatePlayer(playerIndex) {
     updateTurnDisplay();
     checkForGameEnd();
 }
-
 function checkForGameEnd() {
     // If game already ended, don't show another winner
     if (gameEnded) return;
