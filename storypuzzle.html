@@ -1,0 +1,377 @@
+
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Story Puzzles — Match the colours and reveal the letters</title>
+<style>
+:root{--kbd:#6c63ff;--danger:#ff6b6b}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;margin:0;padding:20px;background:#fafafa;color:#111}
+header{display:flex;align-items:center;gap:14px}
+h1{margin:0;font-size:20px}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.common-btn{background:var(--kbd);color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer}
+.common-btn.secondary{background:#ddd;color:#111}
+#key{display:flex;flex-wrap:wrap;gap:6px;padding:6px 0}
+.swatch{width:42px;height:42px;border-radius:6px;cursor:pointer;border:3px solid rgba(255,255,255,0.45);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;flex-wrap:wrap;text-align:center}
+#grid{display:grid;grid-template-columns:repeat(13,minmax(30px,1fr));gap:2px;margin-top:12px}
+.cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-weight:700;border-radius:4px;user-select:none;font-size:15px;color:#fff}
+.cell.hidden{color:transparent}
+.cell.char-visible{color:#fff}
+#meta{margin-top:12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.status{font-size:13px;color:#444}
+#downloads{margin-top:12px}
+.flash{animation:flash 360ms}
+.hint-flash{animation:hintFlash 600ms}
+@keyframes flash{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes hintFlash{0%,100%{transform:scale(1);background-color:#fff;color:#000}50%{transform:scale(1.2);background-color:#ff0;color:#000}}
+</style>
+</head>
+<body>
+
+<header>
+  <span style="font-size:28px">🧩</span>
+  <div>
+    <h1>Story Puzzles — Match the colours and reveal the letters</h1>
+  </div>
+</header>
+
+<div class="controls">
+  <button id="saveQuit" class="common-btn">Save & Quit</button>
+  <button id="resetProgress" class="common-btn secondary">Restart / New Game</button>
+  <button id="hintBtn" class="common-btn secondary">Hint</button>
+  <button id="nextChapter" class="common-btn secondary">Next Chapter</button>
+</div>
+
+<div id="chapterHeading" style="font-weight:700;margin-top:6px;"></div>
+<div id="key"></div>
+<div id="grid"></div>
+
+<div id="meta">
+  <div id="progressStatus" class="status"></div>
+  <div id="foundStatus" class="status"></div>
+  <div id="downloads"></div>
+</div>
+
+<script>
+/* ============================================================
+   CHAPTERS
+============================================================ */
+let chapters=[
+{
+  title:"Chapter 1 - Joey Banks",
+  raw:`I was thinking about all the kids I went to school with Where are they Who were they What were they Rich Dead Happy Dead Happy Famous Probably not as there isnt one famous name among all the names I can remember and I can remember everyones names Thats something you dont forget the names of the kids you went to school with After all you heard them every day for years`
+},
+{
+  title:"Chapter 2.1 - Old Man Charity",
+  raw:`I cant believe that out of how many kids none of us have made it big time possibly by the way most of the kids in my form used to shoplift some might be serving big time in the summer for sport we had the choice between cricket softball and swimming apart from the cricket and softball teams the rest of us ran a muck at bankstown olympic swimming pool they used to double the number of inspectors and still they couldnt keep us under control if you werent reprimanded at least ten times for doing bombs or belly flopping onto someones head then you were a wimp our teacher mr yabserly or uncle stew as we used to call him held the record for the highest number of casualties i think the only reason he kept his job was because he held something over our slap happy cane bearing assembly compulsive control freak of a deputy head master gaskil the gaskil if you wanted to get into a fight or really hurt someones feelings you called tham a gaskil woo after they dropped us back at school two busloads of terrors would ascend upon the milk bar across the road it was a tiny little shop run by a half blind half deaf old man they used to call him old man charity because he gave to the needy every time he turned his back they would help themselves to handfuls of packets of black cats life savers fruit tingles always a favourite packets of chips and all sorts of drinks you name it someone had stolen it old man it used to annoy me that i could barely afford a musk stick then come outside and see kids tucking into four litre tubs of ice cream and black forest cakes which they had just pilfered eventually i succumbed to temptation and decided i would join the criminals after all why should i spend my hard earned pocket money when everyone else was getting away with it actually my pocket money wasnt hard earned at all all i had to do was wash up now and then and stay out of trouble dad used to hand it over and say heres your pocket money son dont spend it all in one place keep out of trouble and help your mother now and then he had an expression for every situation once i high jumped over a hedge in a park i thought i was cool flying over it but on the other side was a two metre drop he leaned over the top and saw me in a heap then asked yea i said licking my wounds well next time look before you leap youre lucky it wasnt a twenty foot drop`
+},
+{
+  title:"Chapter 2.2 - Old Man Charity",
+  raw:`If he knew i was planning to shoplift not only would it have broken an honest mans heart but i could imagine all the cliches he would punish me with crime doesnt pay honesty is the best policy it wouldnt matter if you prepared yourself for all of the obvious ones he would have another twenty up his sleeve whats the world coming to no son of mine he was genius at running them together its a sad day when a son of mine to whom your mother and i have always taught honesty is the best policy breaks our heart and makes us feel so disappointed in you i cant believe that youve taken a path of crime and sunk as low as a common criminal where did your mother and me go wrong what is the world coming to i give up there would be no mercy to his disappointment the next week at the pool i spent the two hours planning my caper decided that i would steal a handful of cigar chewing gums a luxury item usually reserved for the wealthy or the thieves honest paupers like me could only afford the essentials things like water from the bubblers and thank god for paddle pops i even planned which hand i would use and which pocket i would put them in the bus ride home was a sweaty one it looked as though i hadnt dried myself properly but still i was determined to go through with it ive only ever stolen one thing in my life and my conscience was now reminding me of it in second class i used to have an unbearable walk home it was about one and a half kilometres and the first part of it was up a long gradual hill a friend of my mothers had stupidly told me that if i wasnt home by four oclock the boogie man would get me and i believed her she hadnt specifically described the boogie man so in my imagination it was the most hideous and evil creature imaginable even worse than the gaskil the most terrible fate any human being could fall into so by the time id reached the top of the hill i was usually buggered from hurrying i would rest at the shops and sometimes even browse around the hardware shop after all i had at least five minutes up my sleeve after i got home before the boogie man would spit acid in my face and on my feet until i couldnt walk or see any more and drag me off into the never return i had become obsessed with a little tin of hobby paint i thought it was the most incredible thing in the whole world i really wanted it but i couldnt afford it because it was a dollar fifty one day i was in the shop and the man behind the counter was nowhere to be seen and before i knew it i had the tin in my possession and was halfway down gibson avenue round the waterboard and in gow st now i would have to face nelson ave it was a bastard of a hill that used to kill mormons it would try and zap your last ounce of strength to slow you down so the boogie man couldnt get you today they were no match i trod on the toes of adversity and poked the boogie man in the eye i decided to forgo the obligatory bowl of coco pops and cartoon corner my usual reward for making it home safely and went straight to my room so i could admire my spoils suddenly i was overcome with guilt i thought about the consequences of my actions i had stolen something that cost an incredible dollar fifty surely this would put the hardware shop out of business and they would send the police looking for me i then knew i would have to go to jail i realised i had absolutely no use for this stupid little tin of paint i didnt even like the colour i had to get rid of it but where how i looked around and found the most incredible hiding place for it it was the best place in the whole world under the bottom draw in my wardrobe no one would be able to find it there not even the police even though i had the best est you beaut hiding place in the whole world i had to get it out of the house then it came to me take it back brilliant if i could get back in the shop without discovery then my problems would be over i had to be careful because i have seen too many cop shows not to know that a criminal always returns to the scene of the crime would have to bide my time as the shop would already be swarming with police and surrounded by undercover cops parked out front in unmarked cars sipping coffee`
+},
+{
+  title:"Chapter 2.3 - Old Man Charity",
+  raw:`Every day when i walked past the shop i tried not to attract attention to myself but observed everything a month later when i was sure it was safe i orchestrated my plan i had my hand in my pocket and the tin of paint in my hand i didnt take it out of my pocket all day my hand was sweating so much it looked like id pissed myself again i approached the hardware shop i gave the routine check convinced it was safe i went inside the shop assistant was busy serving another customer the other tins were gone calmly i located where they had moved to and checked out the shop assistants whereabouts i only had to take it out of my pocket and i was safe he was looking down you beauty it was out i casually studied it for a while then replaced it and left my conscience felt exonerated would i be so lucky this time i wondered as the bus pulled in front of the school as usual we all made a beeline to the shop for the first time old man charity had a helper judging by his features it could have been old man charity jr my instincts were telling me not to go through with it but i put that down to fear besides while i was waiting i could see all the other kids getting away with it i never noticed how much everyone pushed and shoved before out of reach of my beloved cigars so i pushed my way into a m senior was nothing but junior was sharp i had to be careful now strategic position i studied old man charity senior and jr carefully was up front and it was my turn old man charity had just turned his back i focused on my cigars go i thought as i fumbled in the cigars out of the corner of my eye i saw someone else strike couldnt help but admire their speed they snatched grabbed and escaped with the goods before id even taken my cigar chewing gum out of the box i managed about five into my pocket when old man charity senior grabbed my arm he yelled in a chilling voice put those back when id looked up at him his eyes relayed absolute anger and disappointment and get out of my shop you could see that this poor proud old man felt betrayed i was so humiliated i cried all the way home ive never shoplifted since every now and then i have this reoccurring dream i dont know if that incident has anything to do with it im eating chewing gum and decide to get rid of it the more i try to take it out of my mouth the more it grows im like a lifesaver feeding line to his colleague except the line is in my mouth and im the drowning man also i wake up feeling betrayed i know i was only a kid and i know it was only a few cigar chewing gums but i swear i will always remember the look that old man charity gave me forever`
+}
+];
+
+/* ============================================================
+   CORE STATE
+============================================================ */
+const ALPHABET='abcdefghijklmnopqrstuvwxyz'.split('');
+const GRID_SIZE=13*13;
+let currentChapter=0,keyColors={},chapterGrid=[],revealedLetters={},revealedCells=new Set(),selectedLetter=null;
+const LS_KEY="story-puzzle-progress";
+
+/* ============================================================
+   HSL TO HEX
+============================================================ */
+function hslToHex(h,s,l){
+  h/=360;s/=100;l/=100;
+  let r,g,b;
+  if(s===0){r=g=b=l;}else{
+    const hue2rgb=(p,q,t)=>{if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p;};
+    const q=l<0.5?l*(1+s):l+s-l*s;
+    const p=2*l-q;
+    r=hue2rgb(p,q,h+1/3);g=hue2rgb(p,q,h);b=hue2rgb(p,q,h-1/3);
+  }
+  return"#"+[r,g,b].map(v=>Math.round(v*255).toString(16).padStart(2,"0")).join('');
+}
+
+/* ============================================================
+   GENERATE KEY
+============================================================ */
+function generateKey(){
+  let o = {};
+  ALPHABET.forEach((L)=>{
+    const h = Math.floor(Math.random() * 360);      // hue
+    const s = 70 + Math.random() * 20;             // saturation 70-90%
+    const l = 40 + Math.random() * 20;             // lightness 40-60%
+    o[L] = hslToHex(h, s, l);
+  });
+  o[" "] = "#fafafa"; // background for spaces
+  return o;
+}
+/* ============================================================
+   POPULATE GRID + AUTO-ASSIGN UNUSED
+============================================================ */
+function populateGridAndHandleUnused(){
+  const text=chapters[currentChapter].raw;
+  chapterGrid=Array(GRID_SIZE).fill(" ");
+   for(let i=0;i<text.length && i<GRID_SIZE;i++) chapterGrid[i]=text[i];
+
+const lettersInGrid=new Set(chapterGrid.filter(c=>/[a-z]/i.test(c)).map(c=>c.toLowerCase()));
+if(!revealedLetters[currentChapter]) revealedLetters[currentChapter]=new Set();
+
+// Auto-insert letters not present in grid
+ALPHABET.forEach(letter=>{
+  if(!lettersInGrid.has(letter)) revealedLetters[currentChapter].add(letter);
+});
+}
+
+/* ============================================================
+   RENDER CHAPTER
+============================================================ */
+function renderChapter(){
+  keyColors=generateKey();
+  populateGridAndHandleUnused();
+  document.getElementById("chapterHeading").textContent=chapters[currentChapter].title;
+  document.getElementById("progressStatus").textContent=`Chapter ${currentChapter+1} of ${chapters.length}`;
+  buildKey();
+  buildGrid();
+  updateFound();
+}
+
+/* ============================================================
+   BUILD KEY
+============================================================ */
+function buildKey(){
+  const key=document.getElementById("key"); key.innerHTML="";
+  ALPHABET.forEach(letter=>{
+    const sw=document.createElement("div");
+    sw.className="swatch";
+    sw.style.background=keyColors[letter];
+    sw.dataset.letter=letter;
+
+    let lettersOnSwatch="";
+    for(const l of ALPHABET){
+      if(keyColors[l]===keyColors[letter] && revealedLetters[currentChapter].has(l)) lettersOnSwatch+=l.toUpperCase();
+    }
+    sw.textContent=lettersOnSwatch;
+
+    sw.addEventListener("click",()=>{
+      if(lettersOnSwatch.includes(letter.toUpperCase())) return;
+      selectedLetter=letter;
+      highlightKey(letter);
+    });
+
+    key.appendChild(sw);
+  });
+}
+
+function highlightKey(letter){
+  document.querySelectorAll("#key .swatch").forEach(s=>{
+    s.style.outline=s.dataset.letter===letter?"3px solid #000":"";
+  });
+}
+
+/* ============================================================
+   BUILD GRID
+============================================================ */
+function buildGrid(){
+  const grid=document.getElementById("grid"); grid.innerHTML="";
+  chapterGrid.forEach((ch,i)=>{
+    const cell=document.createElement("div"); cell.className="cell";
+    const isLetter=/[a-z]/i.test(ch);
+    const l=isLetter?ch.toLowerCase():" ";
+    cell.style.background=keyColors[l];
+    if(isLetter && !revealedCells.has(i) && !revealedLetters[currentChapter].has(l)) cell.classList.add("hidden");
+    else cell.classList.add("char-visible");
+    cell.textContent=ch;
+
+    cell.addEventListener("click",()=>{
+      if(selectedLetter) handleDrop(selectedLetter,i);
+    });
+
+    grid.appendChild(cell);
+  });
+}
+
+/* ============================================================
+   HANDLE DROP
+============================================================ */
+function handleDrop(letter,index){
+  const ch=chapterGrid[index];
+  if(!/[a-z]/i.test(ch)) return flash(index);
+  if(ch.toLowerCase()===letter){
+    revealedCells.add(index);
+    revealedLetters[currentChapter].add(letter);
+    buildGrid();
+    buildKey();
+    updateFound();
+    saveProgress();
+  } else flash(index);
+}
+
+function flash(i){
+  const c=document.getElementById("grid").children[i];
+  c.classList.add("flash");
+  setTimeout(()=>c.classList.remove("flash"),360);
+}
+
+/* ============================================================
+   UPDATE FOUND
+============================================================ */
+function updateFound(){
+  const lettersInGrid = new Set(
+    chapterGrid.filter(c => /[a-zA-Z]/.test(c)).map(c => c.toLowerCase())
+  );
+
+  const revealedCount = [...revealedLetters[currentChapter]].filter(l => lettersInGrid.has(l)).length;
+
+  document.getElementById("foundStatus").textContent =
+    `Revealed: ${revealedCount} / ${lettersInGrid.size}`;
+
+  // Check if section is complete
+  if(revealedCount === lettersInGrid.size){
+    // Show download button and popup only once
+    if(!chapters[currentChapter].completed){
+      chapters[currentChapter].completed = true; // mark as completed
+      alert(`🎉 Congratulations! You have earned the right to download "${chapters[currentChapter].title}"!`);
+      showDownload();
+    }
+  }
+}
+
+function showDownload(){
+  const div = document.getElementById("downloads");
+  div.innerHTML = "";
+
+  const btn = document.createElement("button");
+  btn.className = "common-btn";
+
+  const sectionName = chapters[currentChapter].title;
+  btn.textContent = `Download ${sectionName}`;
+
+  btn.onclick = () => downloadChapter(chapters[currentChapter].raw, sectionName);
+
+  div.appendChild(btn);
+}
+/* ============================================================
+   SAVE & LOAD
+============================================================ */
+function saveProgress(){
+  localStorage.setItem(LS_KEY,JSON.stringify({
+    currentChapter,
+    revealed:Object.fromEntries(Object.entries(revealedLetters).map(([k,v])=>[k,[...v]])),
+    revealedCells:[...revealedCells]
+  }));
+}
+
+function loadProgress(){
+  const data=localStorage.getItem(LS_KEY);
+  if(!data) return;
+  const s=JSON.parse(data);
+  currentChapter=s.currentChapter||0;
+  revealedLetters={};
+  for(const k in s.revealed) revealedLetters[k]=new Set(s.revealed[k]);
+  revealedCells=new Set(s.revealedCells||[]);
+}
+
+function downloadChapter(text, name){
+  const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>${name}</title>
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    padding: 20px;
+    color: #111;
+  }
+  .emphasis {
+    font-weight: bold;
+    color: #6c63ff;
+  }
+</style>
+</head>
+<body>
+${text}
+</body>
+</html>`;
+
+  const blob = new Blob([htmlContent], {type:"text/html"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name + ".html";
+  a.click();
+}
+
+/* ============================================================
+   HINT
+============================================================ */
+document.getElementById("hintBtn").onclick=()=>{
+  if(!selectedLetter) return;
+  for(let i=0;i<chapterGrid.length;i++){
+    if(chapterGrid[i].toLowerCase()===selectedLetter && !revealedCells.has(i)){
+      const c=document.getElementById("grid").children[i];
+      c.classList.add("hint-flash");
+      setTimeout(()=>c.classList.remove("hint-flash"),600);
+      break;
+    }
+  }
+};
+
+/* ============================================================
+   BUTTONS
+============================================================ */
+document.getElementById("saveQuit").onclick=()=>{saveProgress();alert("Progress saved ✅");};
+document.getElementById("resetProgress").onclick=()=>{
+  localStorage.removeItem(LS_KEY);
+  revealedLetters={};
+  revealedCells=new Set();
+  selectedLetter=null;
+  renderChapter();
+};
+document.getElementById("nextChapter").onclick = () => {
+  if(currentChapter < chapters.length - 1) {
+    currentChapter++;
+
+    // Reset revealed letters and selections
+    revealedCells = new Set();
+    selectedLetter = null;
+    if(!revealedLetters[currentChapter]) revealedLetters[currentChapter] = new Set();
+
+    // Generate a new random color key for the new chapter
+    keyColors = generateKey();
+
+    // Render chapter fresh
+    renderChapter();
+
+    // Optional: add flash effect to key to show it's new
+    document.querySelectorAll("#key .swatch").forEach(swatch=>{
+      swatch.style.transition = "transform 0.3s";
+      swatch.style.transform = "scale(1.2)";
+      setTimeout(()=>swatch.style.transform="scale(1)",300);
+    });
+
+  } else {
+    alert("You have finished all chapters ✅");
+  }
+};
+
+/* ============================================================
+   INIT
+============================================================ */
+loadProgress();
+renderChapter();
+</script>
+</body>
+</html>
