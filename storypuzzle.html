@@ -379,31 +379,39 @@ function highlightKey(letter){
   });
 }
 
-function buildGrid(){
+function buildGrid() {
   const grid = document.getElementById("grid");
+
+  // ✅ Set chapter title once at the top
+  document.getElementById("chapterHeading").textContent = chapters[currentChapter].title;
+
+  // ✅ Remove stray punctuation
+  chapterGrid = chapterGrid.map(ch => /[a-z0-9 ]/i.test(ch) ? ch : " ");
+
   grid.innerHTML = "";
-  chapterGrid.forEach((ch,i)=>{
-    const cell=document.createElement("div");
-    cell.className="cell";
-    const isLetter=/[a-z]/i.test(ch);
-    const l=isLetter ? ch.toLowerCase() : " ";
+
+  chapterGrid.forEach((ch, i) => {
+    const cell = document.createElement("div");
+    cell.className = "cell";
+
+    const isLetter = /[a-z]/i.test(ch);
+    const l = isLetter ? ch.toLowerCase() : " ";
     cell.style.background = keyColors[l] || "#eee";
 
-    if(isLetter && !revealedCells.has(i) && !revealedLetters[currentChapter].has(l))
+    if (isLetter && !revealedCells.has(i) && !revealedLetters[currentChapter].has(l))
       cell.classList.add("hidden");
     else
       cell.classList.add("char-visible");
 
     cell.textContent = isLetter ? (revealedCells.has(i) ? ch : "") : ch;
 
-    cell.addEventListener("click", ()=>{
-      if(selectedLetter) handleDrop(selectedLetter, i);
+    cell.addEventListener("click", () => {
+      if (selectedLetter) handleDrop(selectedLetter, i);
     });
 
     grid.appendChild(cell);
   });
 }
-
 /* ============================================================
    DROP / FLASH / HINT / DOWNLOAD (mostly unchanged)
 ============================================================ */
