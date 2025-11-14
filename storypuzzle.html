@@ -1,141 +1,66 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Schoolhood Memories Puzzle Game — Updated</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Schoolhood Memories Puzzle Game — Images + Congrats Modal</title>
 <style>
 :root{--kbd:#6c63ff;--danger:#ff6b6b}
-body{
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
-  margin:0;padding:20px;background:#fafafa;color:#111;
-}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;margin:0;padding:20px;background:#fafafa;color:#111}
 header{display:flex;align-items:center;gap:14px}
 h1{margin:0;font-size:20px}
-
 .controls{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
-.common-btn{
-  background:var(--kbd);
-  color:#fff;
-  border:none;
-  padding:8px 12px;
-  border-radius:6px;
-  cursor:pointer;
-}
+.common-btn{background:var(--kbd);color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer}
 .common-btn.secondary{background:#ddd;color:#111}
-
 #chapterHeading{font-weight:700;margin-top:6px}
 
-/* KEY & HINT */
-#keyContainer{
-  display:flex;
-  align-items:center;
-  justify-content:center; /* center key and hint */
-  gap:12px;
-  flex-wrap:wrap;
-  margin:8px 0;
-}
-#key{
-  display:flex;
-  flex-wrap:wrap;
-  gap:6px;
-}
-.swatch{
-  width:28px;
-  height:28px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:4px;
-  cursor:pointer;
-  user-select:none;
-  font-weight:900;
-  color:transparent;
-  border:2px solid rgba(0,0,0,0.25);
-}
-.swatch.selected{border:3px solid #000 !important;}
-.swatch.revealed{
-  background:#d0d0d0 !important;
-  color:#000 !important;
-  font-weight:900;
-}
+/* key & grid */
+#keyContainer{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:8px 0}
+#key{display:flex;flex-wrap:wrap;gap:6px}
+.swatch{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;cursor:pointer;user-select:none;font-weight:900;color:transparent;border:2px solid rgba(0,0,0,0.25);transition:all 220ms ease}
+.swatch.selected{border:3px solid #000 !important;transform:scale(1.08)}
+.swatch.revealed{background:#d0d0d0 !important;color:#000 !important;font-weight:900}
+#hintBtn{width:auto;padding:6px 10px;border-radius:4px;font-size:14px;background:#ddd;color:#111;border:2px solid rgba(0,0,0,0.35);cursor:pointer}
 
-#hintBtn{
-  width:auto;
-  padding:6px 10px;
-  border-radius:4px;
-  font-size:14px;
-  background:#ddd;
-  color:#111;
-  border:2px solid rgba(0,0,0,0.35);
-  cursor:pointer;
-}
-
-/* GRID */
-#grid{
-  display:grid;
-  grid-template-columns:repeat(10, minmax(0, 1fr)); /* 10 columns responsive */
-  gap:2px;
-  max-width:100%;     /* fits screen */
-  overflow-x:auto;    /* allow scroll if zoomed */
-  margin:0 auto;
-}
-#grid-wrapper {
-  max-height: calc((100vw / 10) * 15 + 30px); /* show ~15 rows */
-  overflow-y: auto;
-  overflow-x: hidden;
-  margin: 0 auto;
-}
-.cell{
-  aspect-ratio:1;      /* square */
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:700;
-  border-radius:4px;
-  user-select:none;
-  font-size:1rem;
-  background:#ccc;
-}
-
-/* hidden letters */
+#grid-wrapper{max-height:calc((100vw/10)*15 + 30px);overflow-y:auto;overflow-x:hidden;margin:0 auto}
+#grid{display:grid;grid-template-columns:repeat(10, minmax(0, 1fr));gap:2px;max-width:100%}
+.cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-weight:700;border-radius:6px;user-select:none;font-size:1rem;background:#ccc;transition:background-color 300ms,color 200ms,transform 150ms}
 .cell.hidden{color:transparent}
 .cell.char-visible{color:#000}
-
-/* FLASH EFFECTS */
 .flash{animation:flash 360ms}
 .hint-flash{animation:hintFlash 600ms}
+@keyframes flash{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes hintFlash{0%,100%{transform:scale(1);background-color:#fff;color:#000}50%{transform:scale(1.2);background-color:#ff0;color:#000}}
 
-@keyframes flash{
-  0%{transform:scale(1)}
-  50%{transform:scale(1.08)}
-  100%{transform:scale(1)}
+.status{font-size:13px;color:#444;margin-top:6px}
+
+/* chapter images container */
+#chapterImageContainer{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+#chapterImageContainer img{max-width:100%;border:2px solid #ccc;display:block}
+
+/* congrats modal */
+#congratsModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;z-index:10000}
+#congratsModal .modalCard{background:#fff;padding:18px;border-radius:10px;max-width:520px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.25);text-align:center}
+#congratsModal h2{margin:0 0 6px 0;font-size:20px}
+#congratsModal p{margin:0 0 12px 0;color:#333}
+.modalActions{display:flex;gap:10px;justify-content:center;margin-top:10px}
+
+/* responsive */
+@media (min-width:600px){
+  #grid{max-width:600px}
 }
-@keyframes hintFlash{
-  0%,100%{transform:scale(1);background-color:#fff;color:#000}
-  50%{transform:scale(1.2);background-color:#ff0;color:#000}
-}
-
-.status{font-size:13px;color:#444}
-#downloads{margin-top:12px}
-#debug{margin-top:12px;font-size:12px;color:red;white-space:pre-wrap}
-
-/* Responsive button layout keep Prev left of Next and both above grid */
-.nav-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-
 <header>
   <span style="font-size:28px">🧩</span>
-  <div><h1>Schoolhood Memories Puzzle Game — Updated</h1></div>
+  <div><h1>Schoolhood Memories Puzzle Game — Images + Congrats Modal</h1></div>
 </header>
 
 <div class="controls">
-  <button id="saveQuit" class="common-btn">Save & Quit</button>
-  <button id="resetProgress" class="common-btn secondary">change colours</button>
-  <button id="prevChapter" class="common-btn secondary" style="display:none">Previous Chapter</button>
+  <button id="saveQuit" class="common-btn">Save &amp; Quit</button>
+  <button id="resetProgress" class="common-btn secondary">Change Colours</button>
+  <button id="prevChapter" class="common-btn secondary">Previous Chapter</button>
   <button id="nextChapter" class="common-btn secondary">Next Chapter</button>
 </div>
 
@@ -150,127 +75,83 @@ h1{margin:0;font-size:20px}
   <div id="grid"></div>
 </div>
 
-<div id="meta">
-  <div id="progressStatus" class="status"></div>
-  <div id="foundStatus" class="status"></div>
-  <div id="downloads">
-    <button id="manualDownload" class="common-btn" style="display:none">Download Chapter PDF</button>
+<div class="status" id="foundStatus"></div>
+
+<!-- images will be inserted here -->
+<div id="chapterImageContainer" aria-hidden="true"></div>
+
+<!-- congrats modal -->
+<div id="congratsModal" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modalCard" role="document">
+    <h2>🎉 Congratulations! 🎉</h2>
+    <p>You have earned the right to download this chapter.</p>
+    <div class="modalActions">
+      <button id="downloadChapterBtn" class="common-btn">Download Chapter</button>
+      <button id="continueBtn" class="common-btn secondary">Continue</button>
+    </div>
   </div>
 </div>
 
-<div id="debug"></div>
-
 <script>
-/* ============================================================
-   CHAPTERS (same as original — shortened for brevity in this file,
-   but your full chapters are preserved when I package the final)
-   ============================================================ */
-const chapters = [
+// --- Chapters (example) ---
+let chapters = [
   {
     title: "Chapter 1 - Joey Banks",
-    raw: "I was thinking about all the kids I went to school with Where are they Who were they What were they Rich Dead Happy Dead Happy Famous Probably not as there isnt one famous name among all the names I can remember and I can remember everyones names Thats something you dont forget the names of the kids you went to school with After all you heard them every day for years . I could rrmember them in alphabetical order The only name that had a little bit of fame attached to it was Robert Brough. Brough. Robert Brough was a legend in Primary because he was the first to grow bum fluff on his face; by First Form he had a full on goatee. I guess that's partly because he repeated Six Class three times. It didn't matter; he was still the envy of all us pre-pubescents. I remember when I looked around in first form and saw how hairy all the other guys were; I went home, got out my dad's razor and imitated his shaving routine. 'Jeez I'm a good-looking bloke!'He would say every time he foamed up his face with his old barber's type brush. Then he would start singing in his baritone voice. He only ever sang three things... 'I dream of Jeannie with the light brown hair... Granada you've got me under your spell.' That's all he knew of both songs. For his finale he would finish on 'Figaro...Figaro...Figaro...'It wasn't bad but I used to pretend that he was making the worst sound in the whole world. 'Come off it! I've got a bloody beautiful voice!' He would protest with total indignation. Being a kid I thought it was the funniest thing in the whole world. I cut myself three times and managed to shave the first layer of skin off my face, chest, legs and groin. There were many other guys that must have done the same thing as I wasn't the only one that ended up growing bum fluff on all those vital places. Robert Brough is the bloke's name who compares Family Feud. It couldn't possibly be the same person, unless he's shrunk two feet, shaved off his goatee and had his hair permed. Anything could have happened, Fourth Form, or should I say, Year Ten, was an eternity ago. I remember all the kids thought it was a bummer when we were going into Fourth Form and suddenly, inexplicably they changed the name to Year Ten. We were looking forward to becoming the tough Fourth Formers. Now we would be wimpish Year Ten-ers! As an initiation, the Fourth Formers used to get the First Formers. It was a tradition a Joey Banks, nay, a prerequisite. They would rip off the First Formers tie tags, and then flush the First Formers' heads into an UN-flushed toilet. My next door neighbour, Philip Mitchell, was in Fourth Form and luckily he tipped me off. So I ripped off my own tie tag to make it look like I'd already been got. The plan was working, until there were only a few of us who hadn't received an instant sun tan. Then one day I couldn't avoid it, I had to use the sit downs. Unfortunately, I walked in on a dunking and it wasn't a pretty sight. The Forth Formers wanted more blood and were waiting for me when I came out. I put up a struggle akin the spore upstream of a saimon. Luckily, I managed to flush the toilet with my foot. Then a forth former got his head under mine and his mate flushed the toilet on him. By the end of it, compared to me, they looked like two drowned rats, so I became a legend. Well, that's how I remember it. Some other kids weren't so lucky. Like Philip's little brother, Michael. He was always a bit slow but he must have received one too many bumps on the head during his dunking. Shortly afterwards he was sent to a special school and was never the same again. A few months later I went over the road to visit. Philip, Michael and their mum were watching the tennis. Without warning Michael started masturbating. His brother yelled, 'Put it away!' He just laughed. Then his mother said, 'Get in your room you filthy beast!' Without missing a beat, Michael stood up and went to his room. Apart from the obvious shock, the two things that got me, were how matter of fact they all were about it. It was like they were used to it, as though it was an everyday occurrence. The other thing was, I couldn't get over how big his bloody penis was. I never visited the Mitchell's again. No wonder Joey Banks had such a high truant rate; kids were too scared to use the toilet so they went at home and stayed there"
-},
-  {
-    title: "Chapter 2- Old Man Charity",
-    raw: "I can't believe that out of how many kids none of us have made it big time. Possibly, by the way, most of the kids in my form used to shoplift, some might be serving big time. In the summer for sport, we had the choice between cricket, softball and swimming. Apart from the cricket and softball teams, the rest of us ran a muck at Bankstown Olympic swimming pool. They used to double the number of inspectors and still they couldn't keep us under control. If you weren't reprimanded at least ten times for doing bombs or belly flopping onto someone's head, then you were a wimp.Our teacher, Mr Yabserly or Uncle Stew as we used to call him, heid the record for the highest number of casualties. I think the only reason he kept his job was because he held something over our, slap happy, Cane bearing, assembly compulsive, control freak of a deputy head master, Gaskil. The Gaskil'. If you wanted to get into a fight or really hurt someone's feelings, you called them a 'Gaskil.' Woo! After they dropped us back at school, two busloads of terrors would ascend upon the milk bar across the road. It was a tiny little shop run by a half blind, half deaf old man. They used to call him Old Man Charity, because he gave to the needy - them! Every time he turned his back they would help themselves to handfuls of packets of Black Cats, Life Savers, Fruit Tingles (always a favourite), packets of chips and all sorts of drinks. You name it, someone had stolen it. Old Man Charity had no idea. It used to annoy me that I could barely afford a musk stick, then come outside and see kids tucking into four litre tubs of ice cream and black forest cakes, which they had just pilfered. Eventually I succumbed to temptation and decided I would join the criminals. After all, why should I spend my hard earned pocket money when everyone else was getting away with it? Actually, my pocket money wasn't hard earned at all. All I had to do was wash up now and then and stay out of trouble. Dad used to hand it over and say 'Here's your pocket money son. Don't spend it all in one place, keep out of trouble and help your mother now and then. He had an expression for every situation. Once, I  jumped over a hedge in a park. I thought I was cool flying over it but on the other side was a two metre drop. He leaned over the top and saw me in a heap. Then asked, 'Are you all right son? Yeah' I said licking my wounds 'Well next time, look before you leap! You're lucky it wasn't a twenty foot drop. If he knew I was planning to shoplift not only would it have broken an honest man's heart and I could imagine all the clichés he would punish me with, crime doesn't pay! Honesty is the best policy and it wouldn't matter if you prepared yourself for all of the obvious ones, he would have another twenty up his sleeve. 'What's the world coming to? No son of mine!' He was genius at running them together, 'It's a sad day when a son of mine, to whom your mother and I have always taught, honesty is the best policy, I'm disappointed in you,disappointed vou've taken this criminal path .Where did your mother and I go wrong? What is the world coming to? I give up!' There would be no mercy to his disappointment. The next week at the pool I took two hours to decide that I would steal a handful of cigar chewing gums. A luxury served for the wealthy or 'The Thieves.' Honest paupers like me could only afford the essentials; things like water from the bubblers and thank god for Paddle Pops. Which hand I would use and which pocket. The bus ride home was a sweaty one. It looked as though I hadn't dried myself properly but I was determined to go through with it. I'd only ever stolen one thing in my life and my conscience was now reminding me of it. In Second class I had an unbearable walk home. It was up a long gradual  hill. A friend of my mother's had stupidly told us that The Boogie Man would  get us if  we weren't home before 4 o'clock, and I believed her. She hadn't specifically described an, so in my imagination it was the most hide imaginable. Even worse than, The Gaskil', whom I will describe in more detail later. The most terrible fate any human being could fall into.. By the time I'd reached the top of the book I was buggered from hurrying. I would rest at the shops sometimes even browse around the hardware shop. After all, I had at least five minutes up my sleeve after I got home before Boogie Man would spit acid in my face and on my feet, until I couldn't walk or see any more, and drag me off into the never return, I had become obsessed with a little tin of hobby paint. I thought it was the most incredible thing in the whole world. I really wanted it, but I couldn't afford it because it was a dollar fifty. One day I was in the shop and the man behind the counter was nowhere to be seen and before I knew it, I had the tin in my possession and was halfway down Gibson Avenue, round the Waterboard and in Gow St. Now I would have to face NELSON AVE. It was a bastard of a hill that used to kill Mormons. It would try and zap your last ounce of strength to slow you down so The Boogie Man could get you. Today, they were no match! I trod on the toes of adversity and poked The Boogie Man in the eye. I decided to forgo the obligatory bowl of Coco Pops and Cartoon Corner, my usual reward for making it home safely and went straight to my room so I could admire my spoils. Suddenly I was overcome with guilt. I thought about the the consequences of my actions. I had stolen something that cost an incredible dollar fifty, surely this would put the hardware shop out of business and they would send the police looking for me. I then knew I would have to go to jail. I realised I had absolutely no use for this stupid little tin of paint. I didn't even like the colour. I had to get rid of it. But where? How? I looked around and found the most incredible hiding place for it. It was the best place in the whole world. Under the bottom draw in my wardrobe. No one would be able to find it there, not even the police. Even though I had the best-est you beaut, hiding place in the whole world, I had to get it out of the house. Then it came to me, take it back! Brilliant! If I could get back in the shop without discovery, then my problems would be over. I had to be careful because I have seen too many cop shows not to know that a criminal always returns to the scene of the crime. I would have to bide my time as the shop would already be swarming with police and surrounded by undercover cops, parked out the front in unmarked cars, sipping coffee. Every day when I walked past the shop I tried not to attract attention to myself, but observed everything. A month later, when I was sure it was safe, I orchestrated my plan. I had my hand in my pocket and the tin of paint in my hand. I didn't take it out of my pocket all day. My hand was sweating so much it looked like I'd pissed myself again! As I approached the hardware shop I gave the routine check, convinced it was safe, I went inside. The shop assistant was busy serving another customer. The other tins were gone! Calmly I located where they had moved to and checked out the shop assistant's where abouts. I only had to take it out of my pocket and I was safe. He was looking down, you beauty! It was out! I casually studied it for a while then, replaced it and left. My conscience felt exonerated, Would I be so lucky this time? I wondered as the bus pulled in front of the school. As usual, we all made a beeline to the shop. For the first time Old Man Charity had a helper. Judging by his features, it could have been Old Man Charity Jr. My instincts were telling me not to go through with it, but I put that down to fear. Besides, while I was waiting I could see all the other kids getting away with it. I never noticed how much everyone pushed and shoved before. I was out of reach of my beloved cigars so I pushed my way into a more strategic position. I studied Old Man Charity Senior and Jr. carefully. Senior was nothing but Junior was sharp. I had to be careful. Now I was up front and it was my turn. Old Man Charity had just turned his back. I focused on my cigars. Go! I thought. As I fumbled in the cigars, out of the corner of my eye I saw someone else strike. I couldn't help but admire their speed. They snatched, grabbed and escaped with the goods before I'd even taken my cigar chewing gum out of the box. I managed about five into my pocket when Old Man Charity senior grabbed my arm. He yelled in a chilling voice, 'PUT THOSE BACK!' When I'd looked up at him, his eyes relayed absolute anger and disappointment. 'AND GET OUT OF MY SHOP!' You could see that this poor proud old man felt betrayed. I was so humiliated I cried all the way home. I've never shoplifted since. Every now and then I have this recurring dream. (I don't know if that incident has anything to do with it), I'm eating chewing gum and I decided to get rid of it. The more I try to take it out of my mouth, the more it grows. I'm like a lifesaver feeding line to his colleague except the line is in my mouth and I'm the drowning man. Also, I wake up feeling betrayed. I know I was only a kid and I know it was only a few cigar chewing gums but I swear I will always remember the look that Old Man Charity gave me forever"
+    raw: "I was thinking about all the kids I went to school with Where are they Who were they What were they Rich Dead Happy Dead Happy Famous Probably not as there isnt one famous name among all the names I can remember and I can remember everyones names Thats something you dont forget the names of the kids you went to school with After all you heard them every day for years",
+    image: "year7.jpg"
   },
+  {
+    title: "Chapter 2 - First Day Fumbles",
+    raw: "My first day at the new school was a disaster I tripped over my own shoelaces spilled my lunch and ended up in the wrong classroom Everyone laughed but I survived somehow",
+    images: ["year7.jpg","year7.jpg","year7.jpg"]
+  }
+];
 
-  {
-    title: "Chapter 3 - Wet Pants",
-    raw: "One of the problems I had at school was wet pants I dont mean that I had a weak bladder you see I was still a virgin and I only had to look at a girl and the front of my pants would look like Warragamba Dam all the other kids had dark gray stove pipe pants but I had shiny light gray flares that used to highlight my problem I was so unhip I also used to have a brown shiny briefcase totally totally unhip if you were cool you had a bag that was falling apart one you could write all over one you could carry over your shoulder and could chuck and where it landed was where it stayed if you were really cool one of your handles were broken unfortunately my parents paid a fortune for my briefcase so when I protested and said I wanted another bag they wouldnt listen to reason I told them it was hard to carry home and that it slowed me down so I was in danger of being caught by the boogie man but they just laughed and I could never forgive them I had this beautiful geometry teacher called Miss Sweetapple theres no need to tell you what the other kids made of that name I was in love with her you could tell by my top marks and lower wet lands I couldnt even take a drink of apple juice without thinking of her and creaming my pants it was crazy she had a beautiful face but all class I used to stare at her crotch and imagine things to tell you the truth if I bumped into Miss Sweetapple today I probably wouldnt recognise her face but Id spot her crotch from a hundred metres after I walked out of Miss Sweetapples class you could have played water polo in my pants ..."
-  },
-
-
-  {
-    title: "Chapter 4 - Losing My Virginity",
-    raw: "[Text redacted – placeholder]"
-  },
-  {
-    title: "Chapter 5- The Scabs",
-    raw: "I had two ways of hiding my wet patches. I'd tie my sloppy joe around my waist so that the sleeves would hang down in front of my pants. And I used to hide it by walking around constantly with my shirt hanging out. Actually when it came to cool, that was my only saving grace. What with my light gray shiny, wet fronted flair's and my brown shiny briefcase. I could have been made an outcast, like The Scabs. We used to be able to get a five cent refund on our soft drink bottles. Quite a sum! Three bottles and you get a Chock Wedge but totally UN-hip. There was no way you would return them, no matter how desperate you were. You would roll them across the canteen and call 'Scab'! Invariably Jason Archer or one of the other scabs would collect it. To the chorus of 'SCAB! SCAB! SCAAAB'! When it came to scabs there was an unwritten law. Thou shall not befriend a scab or the wrath of a thousand Gaskils shall fall upon ye! Even the scabs used to call each other scabs but Jason Archer didn't care because he was the Scab's scab. He was making a fortune. On one trip he would have a bottle on every finger and a few tucked under each arm. That was almost a dollar a trip and he used to make about twenty trips just in recess and god knows how many during lunch. By the end of Year Seven, Jason Archer was probably a millionaire. Although by Year Eight the bottom had fallen out of the scabbing business. There were three scabs for every bottle. However, Jason Archer was still getting the majority of the bottles. He used to run the other scabs over with his shopping trolley. Maybe that's what happened to Jason Archer, he became the president of Camaico or maybe he just collects the trolleys for Woolworth's, who knows? Actually I don't think Jason Archer would have had any friends even if he wasn't a scab. He used to look like he was dressed by his mother, A dead giveaway was the jumper tucked into his undies, a shocking look, especially in summer. To make it worse, he used to wear - only for grandfathers and children, Guess whose mum's got a Whirlpool, Y-front jockettes that used to ride halfway up his back. He was the only one in our year still warring Six Class shorts, coupled with long socks and sandals. And, not only did he wear a yellow raincoat, he had the matching yellow fire cap. Fair enough, I had a yellow raincoat but I used to only wear it out the door to make my mother happy. Three streets around the corner from school. I used to take it off and hide it. It was cool to lob at school wringing wet cause you used to get to spend first period in front of the radiator, making strands of cotton float up on the heat. But even on a cloudy day, Jason Archer would wear his yellow raincoat. Or sometimes he would just wear his yellow fire cap all by itself. He also had a personality people would love to hate. People were constantly punching him in the head. I used to think it was cruel. Until one day, in the middle of summer, on a stinking hot day. I was passing him and asked him if he was hot in his jumper. I don't know if it was my tone or maybe I wasn't the first to ask him the same question, but he returned my concern by hitting me in the balls with his briefcase. I remember seeing it flash before my eyes and thinking. 'Christ, I've got the same bag as Jason Archer!' Then, overcoming the pain, I punched him fair on the nose. I remember hearing a cheer, looking up and seeing a few people at the window clapping; one was Uncle Stew. Jeez, belting Jason Archer was a good feeling!"
-  },
-  
-  {
-    "title": "Chapter 13 - Tony Freestone",
-    "raw": "The first dance we ever had at Joey Banks was the Six Class break- up or farewell. I remember at primary when we were practising for it. They assembled Six A Six B and Six C, then made us form a huge circle. When they told us what we were about to do, my mouth sank Ino my heart. My first contact with girls and I had to hold their hands and dance with them. I was mortified. They took us through the movements. Greet your partmer, bow, cross hands, circle to the left, circle to the right, skip three paces clockwise or something like that then the girls would move on to the next parther. I was next to my best friend, Tony Freestone. While the gifts were spinning around to their new partner, he and I wouid take off, breaking away from the as far as we dared. Then back to find the next two girts with bedazzled looks on their faces wondeting where their partners were Then jumping twenity feet in shock as we suddenity retumed no missing a beat We thought it was the funniest thing but I cant remember if we pulled the stunt at the farewell. Tony was great fun. We used to play a game called Flick Rugby. To play the game, you take a tangle piece of paper, cover it in layers of sticky tape and presto, there is your ball. Then you simply flick the ball to the other side of the table, trying to land within an inch of the edge. If you manage this, you've scored a try. The other person has to then put their fists on the table, pointing at each other, pointers joined and thumbs in the air to form the goal posts. Then you have to convert your try by ficking the ball over the posts. As simple as this sounda, it kept us amused for hours. Any time a teacher was sick or for some reason there was a break in the dlass, straight away it would be flick rugby. Tony Freestone was a champion at it and, to make it worse, he would commentate on his efforts, 'And Freestone scores a try! He's got the opposition in a state of confusion, they're not in the same league as Freestone. He lines up the kick, look at his poise, you can tell this is a great champion in action. Yes folks, history is in the making. The opposition, put up a valiant effort but again they are just not in the same class as Freestone. Yes! Yes! An easy conversion for Freestone. The opposition looks defeated, they tried everything but it was hopeless. What a great opening two minutes so far. Another game that Tony excelled in was coins against the wall. We simply used to throw two cent pieces against the wall and the person with the coin closest to the wall wins. Sometimes the haul would be up to twenty cents. Eventually the game was played with twenty cent pieces so the bounty was pientiful. Tony invented a method where his coin would roll along the ground and when it hit the wall, instead of bouncing back like our coins, his would stop dead against the wal every time. He was cleaning up so we had to ban the roll. Tony also exceiled at table bannis and billiards. At least ten times I stoeset in at hs place on my way home and we would play lable heonik. He weuld always baat ma, 21 to 8 or 21 to S: never got into the teens. We ony ever played billiards once, he humilated me one hundred to nit. I haven't seen him since."
-  },
-
-  {
-    title: "Chapter 14 - Holidays at the Bulli camping ground",
-    raw: "  My family used to spend every Christmas holidav’s , across from my grandmother's house, at the Bull Camping Ground. It was in-between the beach and the cemetery so it was the perfect playground for a young boy. In our first year we were placed in the last row with only the isle and one tent separating us from the cemetery. As we were erecting our tent, there was a funeral taking place and I could actually hear one of the mourners crying. It was a bit creepy at first but my attention soon turned to the people in the tent that was nearest the cemetery. The mother was yelling 'You've got too much!' As I was struggling with the bads I was carrying from the car, I just turned to them and said,’ it's alright right’, then dropped everything. Her young daughter was laughing her head off. She was beautiful. I kept stealing glimpses of her,  with each load. They were sunbaking but I didn't know why because they were all this incredible brown colour. They were the brownest white people in the world. They were rubbing some sort of baby oll into their skin and I knew that this had something to do with their perfect sun tans. Later I found out that it was a mixture of baby oil and iodine, so I guess I was right The young girt, Denise, came over and introduced herself, Then she helped me unload. I figured it was either because of my cham or her mother had made her. She was an older woman, about twelve but within minutes we were wrestling and punching each other, so our friendship was off to a great start Her brother, Peter, was about twenty and had his nose broken en sixteen s times. Twice by his elder brother, Rod. Rod's nickname was Stumpy. He wasn't short of a limb; it was because he used to make fences for a living and he was this short, solid bloke. Peter and Rod were animals. They didn't have fleas and wee on the carpet, animals were a gang of renegade surfies. Trouble seemed to follow them around and they loved it. This was their reputation anyway, but all the time we camped opposite them, I never saw them get into any trouble. Of course, I was young and didn't know what they got up to after I was in bed. To me they were just a couple of fun guys that you didn't want to cross. Rod gave me my first ride on a surfboard. He was paddling out and saw me, stopped and, to my delight, asked me if I wanted a go. He pushed me in front of the white water and I was hooked.  "
-  },
-
-  {
-    title: "Chapter- 15 - Irish Joe ",
-    raw: "  A few nights later, Denise invited my sister and me over to her tent fora séance. it was a spooky affair, with the nearby mound of earth covering the newly departed, still unsettled. And their mother, Mrs Celton, a nice lady but all those years of sun, iodine and baby oil had taken its toll on her craggy, old, wrinkly face. Plus the fact that she enjoyed a beer also didn't help her complexion. In my eyes made her look a like a witch. So when I saw her in the dimly lit tent I freaked. The only light was a candle in the middle of a round table. In the centre, there was a glass turned upside down. Around the edge of the table, there were letters and in one corner, numbers. When my sister and I arrived, nobody said hello. Mrs Celton in a commanding voice ordered us to take a seat. Denise and I smiled at each other. 'Place your fingers on the glass' said Mrs Celton still in command. After everyone complied she began rocking backing and forth. Then in a screaming pitch, two octaves higher than her normal speaking voice, asked 'Is there any spirits present? If there are any spirits present give us a sign' Then raising her voice 'I command you to give us a sign!' Suddenly, the glass began to circle the table. If I hadn't been shitting myself, I probably would have found it as amusing as Peter and Denise. 'What is your name?' she asked in a low monotonous voice, stretching out the syllables. The glass began to move as if it had a will of its own. From what i could tell, there didn't seem to be any extra force coming from any of the people sitting at the table. The glass sped from one letter to another. Spelling out the name Irish Joe. Mrs C. continued to ask questions and Irish Joe obliged us with some of the answers. Sometimes the glass would not move and she would repeat the question in a firmer more authoritative tone. Really, I thought, showing no signs for Irish Joe's ghostly sensibilities. A bit scared that he might throw a lamp across the room in protest. She even threatened to terminate his presence. He must have been lonely in the after life as it wasn't long before he was dragging his skeletons out of the purgatorial closet. It turned out that he had murdered his wife and lover after he caught them in bed together. Then chopped up their bodies with an Axe and fed the pieces to his dog. All except her finger which still bore their wedding ring. This he carried around in his purse. Until one day, an observant shopkeeper noticed it when he was buying some rum. Then after Irish Joe had left, the shopkeeper notified the coppers. Irish Joe eluded them for months by hiding out in the bush. Before he was finally convicted and sentenced to hang, he raped a young mother and killed her two year old daughter. While waiting for his sentence to be carried out, he was stabbed in the eye, castrated and bashed to death. Then he was given a pauper's funeral and buried at, you guessed it - the Bulli cemetery. I didn't know what to make of it. Peter and Denise were giggling and I put on a brave front. Despite the fact that I told myself that it wasn't for real, to this day I get goosebumps when I think about it. My sister and I, who had never been that close, held hands walking back to our tent. After the story got out, Irish Joe and the Bulli cemetery became and instant hit. All the kids from the camping ground started playing in the cemetery at night. We would run through it screaming 'I'm Irish Joe and I've come to get you!' The ultimate was to sneak up behind someone and tap them on the shoulder before they knew you were there. This would usually result in a dry cleaning bill. Once, my new bestest camping buddy, Peter Bobbin, and I were on just such an adventure, when we heard loud, daunting continuous moaning. We could tell it wasn't another kid trying to scare us. It was a different sound, yet strangely familiar. A hunting sound that sent shivers up and down my spine. Peter and I didn't look back; we were five rows away from the beach before we stopped for air. After we calmed down, we decided that we had to go back and find out what this frightening, yet compelling sound was. The Bobbin's caravan was nearby so we armed ourselves with a torch and a tent peg each. Quietly we crept through the graveyard. In the distance we could hear the moaning. We circle around it. It became louder and louder and faster and faster. As I got closer I could make out two figures lying top of each other on top of a grave. Suddenly, when we realised that it wasn't Irish Joe killing his next victim and it was our other ne bestest camping buddy, Kevin, making love with a girl; we bolted. We were laughing our heads off. That wasn't the only time I accidentally bumped into Kevin bonking. The next night, a bunch of us had just been down the Christian tent and were going to make a fire on the beach, and there he was. Just over the bank, under a street light in full view of the camping area, bum in the air, gyrating about like tomorrow was about to finish. You had to admire his nerve and consistency. I must admit he looked funny. He still had his pants on pulled down to his ankles and he was on his toes, as if he was trying not to get any sand down them. "
-  },
-    {
-    title: "Chapter 23- The Bankstown Police Boys Military Band",
-    raw: "Every Sunday, before we visited my grandmother, I had to go to band practice. I was in the Bankstown Junior Police Boys' Band, We were the N.S.W. Junior military marching champions and months before the competition, every Sunday, we had to turn up at the Walton's car park in Bankstown Square and for two hours practise our marching band skills. I used to hate it. It's very hard being in a marching band You have to stay in line with the person in front and beside you, march in time, read the music, watch the drum major and listen out for the bass drum signals. It's very embarrassing if you don't hear the boom boom, boom boom. Which means halt and keep marching straight into the person in front of you probably splitting your lip. All this and trying to play while your instrument is bouncing up and down. It's like trying to sing with the hiccups.I got into it because when I was younger, my family and I went on the Chandress, a poor man's version of the Fairstar. All I can remember from the boat was the confusion with trying to find our cabin, my father getting up on stage and riding a dinky and Toto. Toto was the ship's trumpet player. I thought he was quite amazing. My father took me to meet him and, when I told him that I wanted to play the trumpet, he protested almost with disgust, 'Not the trumpet! You must learn the piano, it's better,' explaining himself, 'Your lips get sore on a trumpet, look at my lips.' There was a semi circle lump on his top lip. I didn't care. To me Toto's trumpet was the sweetest sound in the whole world and that's what I wanted to play. Every day I would go and visit him in the auditorium and he would give me a go, but not before he would try and convince to take up the piano instead. A few weeks after we got back to Australia, my dad took me down to the Bankstown Police Boys' Club to see the junior band master, Barry Grove-Jones. Dad bought me a second hand trumpet that cost about fifty dollars. I guess he didn't want to spend a fortune on an instrument that he thought would just wind up in the back of the wardrobe. It wasn't a cornet like the other guys had, but I loved it. Barry Grove-Jones was a peculiar man. His son Stephen, and his daughter, Jenny, were in the junior band too. They were both excellent musicians but Stephen used to skylark a lot making his father scream at him. Barry Grove-Jones was always screaming, usually at the drummers, 'Common Perdy, you bloody block head, keep time!' and he would never let up, 'You know what a drummer is don't you, a drummer is a musician with his brains bashed out! Now keep the bloody time!' I used to feel sorry for them, but at the same time I was glad it wasn't the cornets he was yelling at. He was hard and expected you to give everything. I remember Barry Grove-Jones telling my father when he took me to suss out the band, that the first six months of learning an instrument is like going up a big hill. 'That's when most quit,' he said, 'but after that it gets easier'. There was no way I was going to quit. The same year I repeated Six Class was the year the band gave me a cornet. The Bankstown Police Boys' owned it, but was mine to take home and look after along as i was in the band. I couldn't believe it, my own cornet. The cornet is a B flat instrument the same as a trumpet. It even has the same fingering but it is shorter in length and has a smoother, sexier sound than the trumpet. Even though it was old and had a ding in the bell, I loved it, started taking it to school so I could practise. I didn't even play Cocky Laura any more, I just wanted to play my cornet. I became quite proficient and the area music director invited me to go on a music camp. At the camp I was given all first cornet parts. Not long after that I was given a scholarship to the conservatory of music. My parents were undecided whether or not to send me. So Dad took me up to Barry Grove-Jones and asked him his opinion. He said that whatever they could teach me I could learn here. And that was that. My father said it was too much to travel into the city every day. I also suspected that they thought that I wasn't mature enough and that the school work would be too hard. The hard thing for me was, not long after that. I was hit in the mouth with a surfboard. This made it hard to play the trumpet for long periods. Barry Grove-Jones suggested that I play the trombone instead. The trombone to me sounds like a bad case of the wind. Also, you have to read bass cleft to play the trombone. I wasn't interested, so I left.One of the highlights of my Bankstown Police Boys' Band career was the Easter Show. All the Police Boys' Bands used to come together and play in the arena at the Easter Show. There were hundreds of cornets and Barry Grove-Jones was responsible for the handing out of the music. I remember he gave me a dirty look, then handed me all first cornet parts. Graduating up to First Cornet was a privilege and with it came responsibilities. Every so often we had to play at an opening or at some function. It was a way for the band to raise money. I used to hate after the gig was over, waiting back at the Bankstown Police Boys' Club for my father to pick me up because felt like such a dork dressed in my bright red band uniform. Once we were sending off a luxury cruise ship at Circular Quay and remember one of the songs had a ridiculously long rest. It was about sixty four bars. The First Cornets usually took turns at counting the rests and today it was my turn. When we got to the break I started silently counting 1,2,3,4,2,2,3,4,3,2,3,4, etc. While I was counting started looking around and saw this woman waving frantically down to the dock. She was so desperate, I tried to see what she was waving at. It was a blind man wandering towards the edge of the dock. Suddenly, some man grabbed him and led him back to safety. Now the excitement had finished, I realised that I had lost count.thought if I don't get ready and we miss our bit I'll be in big strife so I raised my cornet to my mouth, just to blow out all the saliva. All the other cornets followed suit. My eyes were glued on Barry Grove- Jones as he usually looked at the section coming in and indicate the exact moment. I knew we had to be getting close so I brought my cornet to the ready position and once again all the other cornets followed suit. It seemed like an eternity before we got the big nod. No thanks to me we all came in on time. Later on, when the others were telling me off, I explained what had happened and of course they didn't believe me.The best part about band practise was running amok at the club. We finished after everyone had left so the boys in the band would play tip rugby or twenty on the trampoline at a time. Once, I got a little too game on the trampoline and attempted a somersault; in the middle opened my eyes to discover I had gone off the edge and was crashing to the ground. I managed to grab the rail but my feet landed on the floor with a thump. As well as the embarrassment, I had to carry around a limp for a few days."
-    },
-      {
-    title: "Chapter24- - Leaving School",
-    raw: " It never really dawned on me that I would have to leave school and go and get a job. Until, in Year Ten we were all sent to a vocational guidance centre. We were asked what sort of work we were interested in doing, and then given a test. My result read, Bruce can do anything he wants, but if he wants to be an electrician he must work on his maths. That was an understatement. Thanks to Mr Sty, my maths needed more that a little work. In the math modulation exam I couldn't answer one question.I had to tell them that my father wanted me to be an electrician, didn't think I could get away with coming home with a result that read - If he applies himself, Bruce has got the aptitude to become a Yo-Yo champion. The only other thing I wanted to do was become a bricklayer but my dad hated that idea too. 'You'll have to work hard all your life!' My dad was protesting, 'it's a dirty, hard job, if you be an electrician all you have to do is walk around with a pair of pliers and a screwdriver in your pocket and you'll never have to get dirty.' Hard work and getting dirty didn't bother me, but there was no way he was going to let me be a bricklayer. So I gave in and agreed. We sent out about fifty resumes and finally I landed a job with Email as an Apprentice Electric Fitter Mechanic. So, I was going to be an electrician. I didn't really know what anyone else was going to do. Except Michael Payne was going to be a fridge mechanic, Peter Charles a sheet metal worker, Malcolm Young was going to go on to Year Eleven and Stephen Seed couldn't wait to go on the dole. The others were undecided or still waiting to hear back from their applications.Muck up day was short, sweet and uneventful, really. Someone had put grease on the hand rails and a couple of windows were broken but that was it. We all ran around writing dumb things on everybody's shirts. Then people were disappearing at their own pace. I said a cheeky good-bye to Mrs Abaid and left. I remember walking home by myself feeling incredibly lonely. Knowing fully that I had just left one world and now I would have to contend with another one. All this happened twenty years ago and I still wonder, where, who?, And what?, about most of my school friends. In all these years the only person from school I've ever bumped into was Tony Sherman. Tony became a bus driver and was living at home in Padstow, in the same house where he grew up. Where once, I had kept him up all night singing 'Born Free'. He was there because he had just had a divorce, and as he put it, 'The Bitch got the house.' The whole time I was looking into his eyes, trying to recognise the boy I grew up with. Tony 'The Tank' Sherman. It was him all right, of course he had put on a fair few pounds and looked like an old version of himself, like we all do. As I was looking at him, some of our memories came flooding back, but I kept them hidden because I didn't want them soiled by the bitter, lonely, unhappy man that was standing in front of me. As for me, I never actually became an electrician, I ended up changing my name to Jimmy Rice, becoming a comedian and writing this book. "
-      }
-  
-];;
-/* For packaging reasons we will dynamically load the original chapters
-   content below from a placeholder injected by the packager. */
-
-/* ============================================================
-   STATE & CYCLE CONFIG
-============================================================ */
 let currentChapter = 0;
 const ALPHABET = 'abcdefghijklmnopqrstuvwxyz'.split('');
 const GRID_SIZE = 13*13;
 let chapterGrid = [], revealedLetters = {}, revealedCells = new Set(), selectedLetter = null;
-let keyColors = {}, vibrantKeyColors = {}, cycleCounter = 0; // cycleCounter drives 3 vibrant -> 2 complementary
-const LS_KEY = "story-puzzle-progress";
+let keyColors = {}, vibrantKeyColors = {}, cycleCounter = 0;
 
-/* ============================================================
-   HSL <-> HEX utilities (kept from original)
-============================================================ */
+// --- HSL Utilities ---
 function hslToHex(h,s,l){
-  h/=360;s/=100;l/=100;
+  h/=360; s/=100; l/=100;
   let r,g,b;
-  if(s===0){r=g=b=l;}else{
-    const hue2rgb=(p,q,t)=>{if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p;};
-    const q=l<0.5?l*(1+s):l+s-l*s;
-    const p=2*l-q;
-    r=hue2rgb(p,q,h+1/3);g=hue2rgb(p,q,h);b=hue2rgb(p,q,h-1/3);
+  if(s===0){ r=g=b=l; }
+  else {
+    const hue2rgb = (p,q,t) => {
+      if(t<0) t+=1;
+      if(t>1) t-=1;
+      if(t<1/6) return p+(q-p)*6*t;
+      if(t<1/2) return q;
+      if(t<2/3) return p+(q-p)*(2/3-t)*6;
+      return p;
+    };
+    const q = l < 0.5 ? l*(1+s) : l+s-l*s;
+    const p = 2*l - q;
+    r = hue2rgb(p,q,h+1/3);
+    g = hue2rgb(p,q,h);
+    b = hue2rgb(p,q,h-1/3);
   }
-  return"#"+[r,g,b].map(v=>Math.round(v*255).toString(16).padStart(2,"0")).join('');
+  return "#" + [r,g,b].map(v=>Math.round(v*255).toString(16).padStart(2,"0")).join('');
 }
-function hexToRgb(hex){
-  if(hex[0]==='#') hex=hex.slice(1);
+
+function blendHSL(hsl1,hsl2,t){
+  const h = (hsl1.h*(1-t) + hsl2.h*t + 360) % 360;
+  const s = Math.min(100, Math.max(0, Math.round(hsl1.s*(1-t) + hsl2.s*t)));
+  const l = Math.min(100, Math.max(0, Math.round(hsl1.l*(1-t) + hsl2.l*t)));
+  return {h,s,l};
+}
+
+function randomSecondaryBase(){
   return {
-    r: parseInt(hex.slice(0,2),16),
-    g: parseInt(hex.slice(2,4),16),
-    b: parseInt(hex.slice(4,6),16)
+    h: Math.floor(Math.random()*360),
+    s: 40 + Math.random()*30,
+    l: 50 + Math.random()*20
   };
 }
-/* Convert RGB to HSL (for complementary calc) */
-function rgbToHsl(r,g,b){
-  r/=255;g/=255;b/=255;
-  const max=Math.max(r,g,b), min=Math.min(r,g,b);
-  let h,s,l=(max+min)/2;
-  if(max===min) h=s=0;
-  else {
-    const d=max-min;
-    s = l>0.5 ? d/(2-max-min) : d/(max+min);
-    switch(max){
-      case r: h = (g-b)/d + (g<b?6:0); break;
-      case g: h = (b-r)/d + 2; break;
-      case b: h = (r-g)/d + 4; break;
-    }
-    h *= 60;
-  }
-  return {h: Math.round(h), s: Math.round(s*100), l: Math.round(l*100)};
-}
 
-/* ============================================================
-   KEY GENERATOR (vibrant) - returns both hex map and HSL map
-============================================================ */
+// --- Generate Vibrant Key ---
 function generateKey(){
   let o = {}, oHSL = {};
   ALPHABET.forEach(L=>{
@@ -278,343 +159,242 @@ function generateKey(){
     const s = 70 + Math.random()*20;
     const l = 40 + Math.random()*20;
     oHSL[L] = {h, s: Math.round(s), l: Math.round(l)};
-    o[L] = hslToHex(h, s, l);
+    o[L] = hslToHex(h,s,l);
   });
-  o[" "] = "#fafafa";
-  oHSL[" "] = {h:0,s:0,l:98};
-  return {hex: o, hsl: oHSL};
+  o[" "] = "#fafafa"; oHSL[" "] = {h:0,s:0,l:98};
+  return {hex:o, hsl:oHSL};
 }
 
-/* ============================================================
-   Apply Complementary Tint (Global) with RANDOM AMOUNTS per key
-   - We take the vibrant HSL, compute complementary H (h+180)
-   - Mix original and complementary by a random tint factor (0.15 - 0.7)
-============================================================ */
-function applyComplementaryFromVibrant(vibrantHSL){
+// --- Apply 3 Vibrant + 2 Complementary (tinted to random secondary) ---
+function applySecondaryTintComplementaryRandom(vibrantHSL){
   const out = {};
-  ALPHABET.forEach(L=>{
-    const base = vibrantHSL[L] || {h:0,s:0,l:90};
-    const compH = (base.h + 180) % 360;
-    // random tint amount between 0.15 and 0.7 (random amounts as requested)
-    const tint = 0.15 + Math.random() * 0.55;
-    // Mix saturations and lightness slightly toward complementary too
-    const mixedS = Math.round(base.s * (1 - tint) + base.s * tint);
-    const mixedL = Math.round(base.l * (1 - tint) + base.l * tint);
-    // final hue is interpolated by rotating towards compH by tint (taking shortest path)
-    // simple linear interp for hue:
-    let dh = compH - base.h;
-    if (dh > 180) dh -= 360;
-    if (dh < -180) dh += 360;
-    const finalH = (base.h + dh * tint + 360) % 360;
-    out[L] = hslToHex(finalH, mixedS, mixedL);
+  const secondaryBaseColor = randomSecondaryBase();
+  let patternIndex = 0;
+  ALPHABET.forEach(letter=>{
+    if(letter === " "){ out[letter] = "#fafafa"; return; }
+    if(patternIndex < 3){
+      out[letter] = hslToHex(vibrantHSL[letter].h, vibrantHSL[letter].s, vibrantHSL[letter].l);
+    } else {
+      const tintFactor = 0.3 + Math.random()*0.5;
+      const blended = blendHSL(vibrantHSL[letter], secondaryBaseColor, tintFactor);
+      out[letter] = hslToHex(blended.h, blended.s, blended.l);
+    }
+    patternIndex = (patternIndex + 1) % 5;
   });
-  out[" "] = "#fafafa";
   return out;
 }
 
-/* ============================================================
-   POPULATE GRID & PREPARE RAW (kept from original, lightly adapted)
-============================================================ */
-function prepareChapterRaw(){
-  // If chapters content was injected, skip
-  chapters.forEach(chapter=>{
-    if(!chapter.raw || chapter.raw===""){
-      const formatted = (chapter.formatted || "")
-        .replace(/[^a-zA-Z\s]/g,"")
-        .replace(/\s+/g," ")
-        .trim()
-        .toLowerCase();
-      chapter.raw = formatted || chapter.raw || "";
-    }
-  });
-}
-
+// --- Grid & Key Population ---
 function populateGrid(){
   const text = (chapters[currentChapter] && chapters[currentChapter].raw) || "";
   chapterGrid = Array(GRID_SIZE).fill(" ");
-  for(let i=0;i<text.length && i<GRID_SIZE;i++) chapterGrid[i]=text[i];
+  for(let i=0;i<text.length && i<GRID_SIZE; i++) chapterGrid[i] = text[i];
   if(!revealedLetters[currentChapter]) revealedLetters[currentChapter] = new Set();
+  // rebuild revealedCells for already revealed letters
+  revealedCells = new Set();
+  revealedLetters[currentChapter].forEach(letter=>{
+    chapterGrid.forEach((c,i)=>{ if(c.toLowerCase()===letter) revealedCells.add(i); });
+  });
 }
 
-/* ============================================================
-   BUILD KEY & GRID (use keyColors mapping)
-============================================================ */
 function buildKey(){
   const key = document.getElementById("key");
   key.innerHTML = "";
-
-  const lettersInChapter = new Set(
-    chapterGrid.filter(c => /[a-z]/i.test(c)).map(c => c.toLowerCase())
-  );
-
-  ALPHABET.forEach(letter => {
+  const lettersInChapter = new Set(chapterGrid.filter(c=>/[a-z]/i.test(c)).map(c=>c.toLowerCase()));
+  ALPHABET.forEach(letter=>{
     const sw = document.createElement("div");
     sw.className = "swatch";
     sw.dataset.letter = letter;
     sw.style.background = (keyColors[letter] || "#fafafa");
-
     if(revealedLetters[currentChapter].has(letter) || !lettersInChapter.has(letter)){
       sw.classList.add("revealed");
       sw.textContent = letter.toUpperCase();
       revealedLetters[currentChapter].add(letter);
     }
-
-    sw.addEventListener("click", () => {
+    sw.addEventListener("click", ()=>{
       if(revealedLetters[currentChapter].has(letter)) return;
       selectedLetter = letter;
       highlightKey(letter);
     });
-
     key.appendChild(sw);
   });
 }
 
 function highlightKey(letter){
-  document.querySelectorAll("#key .swatch").forEach(s => {
-    if (s.dataset.letter === letter && !revealedLetters[currentChapter].has(letter)) {
+  document.querySelectorAll("#key .swatch").forEach(s=>{
+    if(s.dataset.letter===letter && !revealedLetters[currentChapter].has(letter)){
       s.classList.add("selected");
-    } else {
-      s.classList.remove("selected");
-    }
+    } else s.classList.remove("selected");
   });
 }
 
-function buildGrid() {
+function buildGrid(){
   const grid = document.getElementById("grid");
-
-  // ✅ Set chapter title once at the top
-  document.getElementById("chapterHeading").textContent = chapters[currentChapter].title;
-
-  // ✅ Remove stray punctuation
-  chapterGrid = chapterGrid.map(ch => /[a-z0-9 ]/i.test(ch) ? ch : " ");
-
   grid.innerHTML = "";
-
-  chapterGrid.forEach((ch, i) => {
+  chapterGrid.forEach((ch,i)=>{
     const cell = document.createElement("div");
     cell.className = "cell";
-
     const isLetter = /[a-z]/i.test(ch);
     const l = isLetter ? ch.toLowerCase() : " ";
     cell.style.background = keyColors[l] || "#eee";
-
-    if (isLetter && !revealedCells.has(i) && !revealedLetters[currentChapter].has(l))
-      cell.classList.add("hidden");
-    else
-      cell.classList.add("char-visible");
-
+    if(isLetter && !revealedCells.has(i) && !revealedLetters[currentChapter].has(l)) cell.classList.add("hidden");
+    else cell.classList.add("char-visible");
     cell.textContent = isLetter ? (revealedCells.has(i) ? ch : "") : ch;
-
-    cell.addEventListener("click", () => {
-      if (selectedLetter) handleDrop(selectedLetter, i);
-    });
-
+    cell.addEventListener("click", ()=>{ if(selectedLetter) handleDrop(selectedLetter, i); });
     grid.appendChild(cell);
   });
 }
-/* ============================================================
-   DROP / FLASH / HINT / DOWNLOAD (mostly unchanged)
-============================================================ */
-function handleDrop(letter,index){
+
+function handleDrop(letter, index){
   const ch = chapterGrid[index];
   if(!/[a-z]/i.test(ch)) return flash(index);
-
   if(ch.toLowerCase() === letter){
     revealedLetters[currentChapter].add(letter);
-    chapterGrid.forEach((c, i) => {
-      if(c.toLowerCase() === letter) revealedCells.add(i);
-    });
+    chapterGrid.forEach((c,i)=>{ if(c.toLowerCase()===letter) revealedCells.add(i); });
     buildGrid();
     buildKey();
     updateFound();
-  } else {
-    flash(index);
-  }
+    checkCompletion();
+  } else flash(index);
 }
+
 function flash(i){
   const c = document.getElementById("grid").children[i];
   if(!c) return;
   c.classList.add("flash");
-  setTimeout(()=>c.classList.remove("flash"),360);
+  setTimeout(()=>c.classList.remove("flash"), 360);
 }
+
 document.getElementById("hintBtn").addEventListener("click", ()=>{
   if(!selectedLetter) return;
-  let flashed=false;
+  let flashed = false;
   for(let i=0;i<chapterGrid.length;i++){
     if(chapterGrid[i].toLowerCase()===selectedLetter && !revealedCells.has(i)){
-      flashed=true;
-      const c=document.getElementById("grid").children[i];
+      flashed = true;
+      const c = document.getElementById("grid").children[i];
       c.classList.add("hint-flash");
-      setTimeout(()=>c.classList.remove("hint-flash"),600);
+      setTimeout(()=>c.classList.remove("hint-flash"), 600);
     }
   }
   if(!flashed){
-    const selected=document.querySelector("#key .swatch.selected");
-    if(selected){
-      selected.classList.add("flash");
-      setTimeout(()=>selected.classList.remove("flash"),360);
-    }
+    const selected = document.querySelector("#key .swatch.selected");
+    if(selected){ selected.classList.add("flash"); setTimeout(()=>selected.classList.remove("flash"), 360); }
   }
 });
 
-/* Minimal PDF download preserved */
-function downloadChapterPDF(chapterIndex){
-  const chapter = chapters[chapterIndex];
-  if(!chapter) return;
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  doc.setFontSize(16); doc.text(chapter.title || "Chapter",10,20);
-  doc.setFontSize(12);
-  const lines = doc.splitTextToSize((chapter.raw||""),180);
-  doc.text(lines,10,30);
-  doc.save(`${(chapter.title||'chapter')}.pdf`);
-}
-document.getElementById("manualDownload").onclick = ()=>downloadChapterPDF(currentChapter);
-
-/* ============================================================
-   CYCLE LOGIC: determine mode from cycleCounter
-   0-2 => vibrant, 3-4 => complementary
-============================================================ */
-function modeFromCounter(cnt){
-  const m = cnt % 5;
-  return (m <= 2) ? "vibrant" : "complementary";
-}
-
-/* Advance counter and apply appropriate keyColors */
-function advanceCycleAndApplyColors({fromChapterLoad=false} = {}){
-  // increment counter as per spec (both Next and Change and Prev increment)
-  cycleCounter++;
-  const mode = modeFromCounter(cycleCounter);
-  if(mode === "vibrant"){
-    // keep/generate vibrant colors and use them
-    const g = generateKey();
-    vibrantKeyColors = g; // store both hex and hsl
-    keyColors = Object.assign({}, g.hex);
-  } else {
-    // ensure we have a vibrant base to tint from; if not, generate one
-    if(!vibrantKeyColors || !vibrantKeyColors.hsl){
-      vibrantKeyColors = generateKey();
-    }
-    // generate complementary tinted mapping from vibrant HSL
-    keyColors = applyComplementaryFromVibrant(vibrantKeyColors.hsl);
-  }
-  // if called as chapter load first render, we must force vibrant display
-  if(fromChapterLoad){
-    // force vibrant render for the first draw of a new chapter
-    const g = generateKey();
-    vibrantKeyColors = g;
-    keyColors = Object.assign({}, g.hex);
-  }
-  // rebuild visuals
-  buildKey();
-  buildGrid();
-}
-
-/* ============================================================
-   Update found status + congrats (kept)
-============================================================ */
 function updateFound(){
   const lettersInGrid = new Set(chapterGrid.filter(c=>/[a-z]/i.test(c)).map(c=>c.toLowerCase()));
   const revealedCount = [...revealedLetters[currentChapter]].filter(l=>lettersInGrid.has(l)).length;
   document.getElementById("foundStatus").textContent = `Revealed: ${revealedCount} / ${lettersInGrid.size}`;
-  if(revealedCount === lettersInGrid.size && !chapters[currentChapter].completed){
-    chapters[currentChapter].completed = true;
-    showCongrats();
-    document.getElementById("manualDownload").style.display = "inline-block";
+}
+
+// --- Show chapter image(s) ---
+function showChapterImage(){
+  const ch = chapters[currentChapter];
+  const container = document.getElementById("chapterImageContainer");
+  if(!container) return; // should exist in DOM
+  container.innerHTML = "";
+  if(ch.images && ch.images.length > 0){
+    ch.images.forEach(src=>{
+      const img = document.createElement("img");
+      img.src = src;
+      img.alt = "";
+      container.appendChild(img);
+    });
+  } else if(ch.image){
+    const img = document.createElement("img");
+    img.src = ch.image;
+    img.alt = "";
+    container.appendChild(img);
   }
 }
 
-/* congrats popup preserved from original */
-function showCongrats(){
-  localStorage.setItem(LS_KEY, JSON.stringify(revealedLetters));
-  const overlay = document.createElement("div");
-  overlay.style.position="fixed"; overlay.style.top=0; overlay.style.left=0;
-  overlay.style.width="100%"; overlay.style.height="100%"; overlay.style.background="rgba(0,0,0,0.5)";
-  overlay.style.display="flex"; overlay.style.alignItems="center"; overlay.style.justifyContent="center";
-  overlay.style.zIndex=9999;
-  const modal = document.createElement("div");
-  modal.style.background="#fff"; modal.style.padding="20px"; modal.style.borderRadius="10px";
-  modal.style.textAlign="center"; modal.style.maxWidth="380px"; modal.style.boxShadow="0 4px 15px rgba(0,0,0,0.3)";
-  const msg = document.createElement("p"); msg.textContent="Congratulations! You have earned the right to download the chapter ✅";
-  msg.style.fontWeight="700"; modal.appendChild(msg);
-  const btnContainer = document.createElement("div");
-  btnContainer.style.display="flex"; btnContainer.style.justifyContent="space-around"; btnContainer.style.marginTop="15px";
-  const downloadBtn = document.createElement("button"); downloadBtn.textContent="Download Chapter"; downloadBtn.className="common-btn";
-  downloadBtn.onclick = ()=>{ downloadChapterPDF(currentChapter); document.body.removeChild(overlay); };
-  const continueBtn = document.createElement("button"); continueBtn.textContent="Continue"; continueBtn.className="common-btn secondary";
-  continueBtn.onclick = ()=>{ document.body.removeChild(overlay); document.getElementById("nextChapter").click(); };
-  btnContainer.appendChild(downloadBtn); btnContainer.appendChild(continueBtn); modal.appendChild(btnContainer); overlay.appendChild(modal); document.body.appendChild(overlay);
+// --- Completion modal ---
+function checkCompletion(){
+  const lettersInGrid = new Set(chapterGrid.filter(c=>/[a-z]/i.test(c)).map(c=>c.toLowerCase()));
+  const revealedCount = [...revealedLetters[currentChapter]].filter(l=>lettersInGrid.has(l)).length;
+  if(lettersInGrid.size > 0 && revealedCount >= lettersInGrid.size){
+    showCongratsModal();
+  }
 }
 
-/* ============================================================
-   BUTTON HOOKS: Next / Prev / Change (resetProgress) 
-   - All increment cycleCounter
-   - New chapter loads always start vibrant (fromChapterLoad=true)
-   - Previous placed left of Next as requested
-============================================================ */
-document.getElementById("saveQuit").onclick=()=>{
-  localStorage.setItem(LS_KEY, JSON.stringify(revealedLetters));
-  alert("Progress saved ✅");
-};
+function showCongratsModal(){
+  const modal = document.getElementById("congratsModal");
+  modal.style.display = "flex";
+  modal.setAttribute("aria-hidden","false");
+}
+function hideCongratsModal(){
+  const modal = document.getElementById("congratsModal");
+  modal.style.display = "none";
+  modal.setAttribute("aria-hidden","true");
+}
 
-document.getElementById("resetProgress").onclick = ()=>{
-  // acts as Change button: increments cycle and applies colors
-  // preserve revealedCells mapping (as original did)
-  revealedCells = new Set();
-  chapterGrid.forEach((c,i)=>{ if(/[a-z]/i.test(c) && revealedLetters[currentChapter].has(c.toLowerCase())) revealedCells.add(i); });
-  selectedLetter = null;
-  advanceCycleAndApplyColors({fromChapterLoad:false});
-};
+// --- Download chapter btn ---
+document.getElementById("downloadChapterBtn").addEventListener("click", ()=>{
+  const text = chapters[currentChapter] && chapters[currentChapter].raw ? chapters[currentChapter].raw : "";
+  const blob = new Blob([text], {type: "text/plain;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `Chapter_${currentChapter+1}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+});
 
-document.getElementById("nextChapter").onclick = ()=>{
+// continue button
+document.getElementById("continueBtn").addEventListener("click", ()=>{
+  hideCongratsModal();
   if(currentChapter < chapters.length - 1){
     currentChapter++;
     revealedCells = new Set();
     selectedLetter = null;
     if(!revealedLetters[currentChapter]) revealedLetters[currentChapter] = new Set();
     populateGrid();
-    // increment cycle counter AND apply; but force vibrant first render of new chapter
     advanceCycleAndApplyColors({fromChapterLoad:true});
-    // show prev button now (if it was hidden)
-    document.getElementById("prevChapter").style.display = "inline-block";
     updateFound();
-  } else alert("You have finished all chapters ✅");
-};
+  }
+});
 
+// --- Advance Cycle & Colours ---
+function advanceCycleAndApplyColors({fromChapterLoad=false}={}){
+  cycleCounter++;
+  document.getElementById("chapterHeading").textContent = chapters[currentChapter].title;
+  const g = generateKey();
+  vibrantKeyColors = g;
+  keyColors = applySecondaryTintComplementaryRandom(g.hsl);
+  buildKey();
+  buildGrid();
+  showChapterImage();
+}
+
+// --- Buttons ---
+document.getElementById("saveQuit").onclick = ()=>{ alert("Progress saved ✅"); };
+document.getElementById("resetProgress").onclick = ()=>{ advanceCycleAndApplyColors(); };
+document.getElementById("nextChapter").onclick = ()=>{
+  if(currentChapter < chapters.length-1){
+    currentChapter++;
+    revealedCells = new Set();
+    selectedLetter = null;
+    if(!revealedLetters[currentChapter]) revealedLetters[currentChapter] = new Set();
+    populateGrid(); advanceCycleAndApplyColors({fromChapterLoad:true}); updateFound();
+  } else alert("You finished all chapters ✅");
+};
 document.getElementById("prevChapter").onclick = ()=>{
   if(currentChapter > 0){
     currentChapter--;
     revealedCells = new Set();
     selectedLetter = null;
     if(!revealedLetters[currentChapter]) revealedLetters[currentChapter] = new Set();
-    populateGrid();
-    // As requested, previous also increments the cycle counter and we force vibrant first render of the chapter
-    advanceCycleAndApplyColors({fromChapterLoad:true});
-    if(currentChapter === 0) document.getElementById("prevChapter").style.display = "none";
-    updateFound();
+    populateGrid(); advanceCycleAndApplyColors({fromChapterLoad:true}); updateFound();
   }
 };
 
-/* ============================================================
-   INIT
-============================================================ */
+// --- Init ---
 document.addEventListener("DOMContentLoaded", ()=>{
-  prepareChapterRaw();
   populateGrid();
-  // initial vibrant generation (start state)
-  const g = generateKey();
-  vibrantKeyColors = g;
-  keyColors = Object.assign({}, g.hex);
-  buildKey();
-  buildGrid();
+  advanceCycleAndApplyColors({fromChapterLoad:true});
   updateFound();
-  // show/hide prev accordingly
-  document.getElementById("prevChapter").style.display = currentChapter === 0 ? "none" : "inline-block";
 });
-
-/* expose some for debugging if needed */
-window.__sp = { advanceCycleAndApplyColors, generateKey, applyComplementaryFromVibrant, modeFromCounter };
 </script>
-
 </body>
 </html>
