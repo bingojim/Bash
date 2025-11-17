@@ -58,7 +58,6 @@ h1{margin:0;font-size:20px}
 
 <div class="controls">
   <button id="clearProgress" class="common-btn">Clear Progress</button>
-  <button id="resetProgress" class="common
   <button id="colorShiftBtn" class="common-btn secondary">Change Colours</button>
   <button id="prevChapter" class="common-btn secondary">Previous Chapter</button>
   <button id="nextChapter" class="common-btn secondary">Next Chapter</button>
@@ -77,7 +76,6 @@ h1{margin:0;font-size:20px}
 
 <div class="status" id="foundStatus"></div>
 
-<!-- Permanent button appears here -->
 <div id="bottomDownloadContainer"></div>
 
 <div id="chapterImageContainer" aria-hidden="true"></div>
@@ -379,34 +377,8 @@ The only two other things I can remember from that holiday was milking a cow, wh
     images: ["10c.jpg","leaving school.jpg"]
       }
 ];
-function changeKeyColors() {
-  // Move to the next colour turn
-  generatorState.turnCount++;
-
-  // Switch from vibrant → complementary after VIBRANT_TURNS
-  if (generatorState.type === "vibrant" && generatorState.turnCount >= VIBRANT_TURNS) {
-    generatorState.type = "complementary";
-    generatorState.turnCount = 0;
-  }
-  // Switch from complementary → vibrant after COMPLEMENTARY_TURNS
-  else if (generatorState.type === "complementary" && generatorState.turnCount >= COMPLEMENTARY_TURNS) {
-    generatorState.type = "vibrant";
-    generatorState.turnCount = 0;
-  }
-
-  // Generate a new set of colours
-  const g = generateKey();
-
-  // Save the new colours
-  vibrantKeyColors = g;
-  keyColors = g.hex;
-
-  // Rebuild the keyboard and puzzle grid
-  buildKey();
-  buildGrid();
-}
 // ==============================
-// SANITIZE TITLES FOR DOWNLOAD
+// Sanitize filenames for download
 // ==============================
 function sanitizeFilename(name){
   let safe = name.normalize('NFKD').replace(/[^\w\s-]/g, '');
@@ -414,99 +386,66 @@ function sanitizeFilename(name){
   if(!safe) safe = `Chapter_${currentChapter+1}`;
   return safe;
 }
-
-chapters.forEach((ch,i)=>{
-  ch.safeTitle = sanitizeFilename(ch.title || `Chapter_${i+1}`);
-});
+chapters.forEach((ch,i)=> ch.safeTitle = sanitizeFilename(ch.title || `Chapter_${i+1}`));
 
 let currentChapter = 0;
 const ALPHABET = 'abcdefghijklmnopqrstuvwxyz'.split('');
-// ==============================
-// Key color generator state
-// ==============================
-let generatorState = {
-  type: "vibrant",   // "vibrant" or "complementary"
-  turnCount: 0       // how many turns used in current type
-};
-
+let generatorState = { type: "vibrant", turnCount: 0 };
 const VIBRANT_TURNS = 3;
 const COMPLEMENTARY_TURNS = 2;
-
-// keep these global references (already used in your script)
-let keyColors = {};           // hex map for letters
-let vibrantKeyColors = {};    // full {hex,hsl} object for reference
+let keyColors = {};
+let vibrantKeyColors = {};
 const GRID_SIZE = 100;
 let chapterGrid = [];
 let revealedLetters = {};
 let revealedCells = new Set();
 let selectedLetter = null;
 
-
-
 // ==============================
-// DOWNLOAD FUNCTION
+// SAVE / LOAD PROGRESS
 // ==============================
-function downloadCurrentChapter() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  const chapterText = chapters[currentChapter]?.raw || "";
-
-  const lines = doc.splitTextToSize(chapterText, 180); // wrap text to 180mm width
-  const lineHeight = 7; // space between lines
-  let y = 10;
-
-  doc.setFontSize(12);
-  doc.text(chapters[currentChapter]?.title || `Chapter ${currentChapter+1}`, 10, y);
-  y += 10;
-  doc.setFontSize(10);
-
-  lines.forEach(line => {
-    if (y > 290) {  // approximate page height for A4 in mm
-      doc.addPage();
-      y = 10;
-    }
-    doc.text(line, 10, y);
-    y += lineHeight;
+function saveProgress() {
+  const progress = {
+    currentChapter,
+    revealedLetters: {},
+    solvedChapters: {}
+  };
+  chapters.forEach((ch,i)=>{
+    progress.revealedLetters[i] = Array.from(revealedLetters[i] || []);
+    progress.solvedChapters[i] = !!ch.solved;
   });
-
-  // Safe filename
-  let filename = chapters[currentChapter]?.title || `Chapter_${currentChapter+1}`;
-  filename = filename.normalize('NFKD').replace(/[^\w\s-]/g,'').replace(/\s+/g,'_').trim();
-  if(!filename) filename = `Chapter_${currentChapter+1}`;
-
-  doc.save(filename + ".pdf");
+  localStorage.setItem("schoolhoodPuzzleProgress", JSON.stringify(progress));
 }
-// ==============================
-// PERMANENT DOWNLOAD BUTTON
-// ==============================
-function addBottomDownloadButton() {
-  const container = document.getElementById("bottomDownloadContainer");
-  if(container.querySelector("button")) return; // prevent duplicates
 
-  const btn = document.createElement("button");
-  btn.textContent = "Download Chapter";
-  btn.className = "common-btn";
-  btn.addEventListener("click", downloadCurrentChapter);
-  container.appendChild(btn);
+function loadProgress() {
+  const saved = localStorage.getItem("schoolhoodPuzzleProgress");
+  if (!saved) return;
+  try {
+    const progress = JSON.parse(saved);
+    currentChapter = progress.currentChapter || 0;
+    chapters.forEach((ch,i)=>{
+      revealedLetters[i] = new Set(progress.revealedLetters[i] || []);
+      ch.solved = !!progress.solvedChapters[i];
+    });
+  } catch(e) { console.warn("Failed to load progress:", e); }
 }
 
 // ==============================
-// HSL Utilities & Grid
+// KEY COLOR GENERATOR
 // ==============================
 function hslToHex(h,s,l){
   h/=360; s/=100; l/=100;
   let r,g,b;
   if(s===0){ r=g=b=l; }
   else {
-    const hue2rgb = (p,q,t) => {
-      if(t<0) t+=1;
-      if(t>1) t-=1;
+    const hue2rgb = (p,q,t)=>{
+      if(t<0) t+=1; if(t>1) t-=1;
       if(t<1/6) return p+(q-p)*6*t;
       if(t<1/2) return q;
       if(t<2/3) return p+(q-p)*(2/3-t)*6;
       return p;
     };
-    const q = l < 0.5 ? l*(1+s) : l+s-l*s;
+    const q = l<0.5 ? l*(1+s) : l+s-l*s;
     const p = 2*l - q;
     r = hue2rgb(p,q,h+1/3);
     g = hue2rgb(p,q,h);
@@ -514,88 +453,107 @@ function hslToHex(h,s,l){
   }
   return "#" + [r,g,b].map(v=>Math.round(v*255).toString(16).padStart(2,"0")).join('');
 }
+
 function generateKey() {
-  const hex = {};
-  const hsl = {};
-  const letters = [...ALPHABET];
-
+  const hex = {}; const hsl = {}; const letters = [...ALPHABET];
   let baseHues = [];
+  if(generatorState.type==="vibrant"){ for(let i=0;i<3;i++) baseHues.push(Math.floor(Math.random()*360)); }
+  else { for(let i=0;i<2;i++){ const hue=Math.floor(Math.random()*360); baseHues.push((hue+180)%360); } }
 
-  // Determine generator type based on current state
-  if (generatorState.type === "vibrant") {
-    // Vibrant: 3 strong hues
-    for (let i = 0; i < 3; i++) {
-      baseHues.push(Math.floor(Math.random() * 360));
-    }
-  } else {
-    // Complementary: 2 complementary hues
-    for (let i = 0; i < 2; i++) {
-      const hue = Math.floor(Math.random() * 360);
-      baseHues.push((hue + 180) % 360); // complementary
-    }
-  }
-
-  // Assign colors to letters
-  letters.forEach((L, i) => {
-    let hue, s, l;
-
-    if (generatorState.type === "vibrant") {
-      hue = baseHues[i % baseHues.length];
-      s = 75 + Math.random() * 15; // high saturation
-      l = 45 + Math.random() * 10; // medium lightness
+  letters.forEach((L,i)=>{
+    let hue,s,l;
+    if(generatorState.type==="vibrant"){
+      hue=baseHues[i%baseHues.length]; s=75+Math.random()*15; l=45+Math.random()*10;
     } else {
-      // complementary generator
-      hue = baseHues[i % baseHues.length];
-      s = 50 + Math.random() * 20; // slightly muted
-      l = 50 + Math.random() * 20; // moderate lightness
+      hue=baseHues[i%baseHues.length]; s=50+Math.random()*20; l=50+Math.random()*20;
     }
-
-    // Subtle tint variation for separation
-    const tintFactor = 0.2 + Math.random() * 0.3; // 20%-50%
-    hue = (hue * (1 - tintFactor) + Math.random() * 360 * tintFactor) % 360;
-
-    hsl[L] = { h: hue, s, l };
-    hex[L] = hslToHex(hue, s, l);
+    const tintFactor=0.2+Math.random()*0.3;
+    hue=(hue*(1-tintFactor)+Math.random()*360*tintFactor)%360;
+    hsl[L]={h:hue,s,l}; hex[L]=hslToHex(hue,s,l);
   });
-
-  // Space key
-  hex[" "] = "#fafafa";
-  hsl[" "] = { h: 0, s: 0, l: 98 };
-
-  return { hex, hsl };
+  hex[" "]="#fafafa"; hsl[" "]={h:0,s:0,l:98};
+  return { hex,hsl };
+}
+function changeKeyColors() {
+  generatorState.turnCount++;
+  if(generatorState.type==="vibrant" && generatorState.turnCount>=VIBRANT_TURNS){
+    generatorState.type="complementary"; generatorState.turnCount=0;
+  } else if(generatorState.type==="complementary" && generatorState.turnCount>=COMPLEMENTARY_TURNS){
+    generatorState.type="vibrant"; generatorState.turnCount=0;
+  }
+  const g=generateKey(); vibrantKeyColors=g; keyColors=g.hex;
+  buildKey(); buildGrid();
 }
 
-function populateGrid(){
-  document.getElementById("bottomDownloadContainer").innerHTML = ""; // always hide initially
+// ==============================
+// GRID & KEY BUILD
+// ==============================
+function populateGrid() {
+  document.getElementById("bottomDownloadContainer").innerHTML = ""; // hide download initially
 
   const text = (chapters[currentChapter] && chapters[currentChapter].raw) || "";
-  chapterGrid = Array(GRID_SIZE).fill(" ");
-  for(let i=0;i<text.length && i<GRID_SIZE;i++) chapterGrid[i]=text[i];
-  if(!revealedLetters[currentChapter]) revealedLetters[currentChapter] = new Set();
+  chapterGrid = Array(GRID_SIZE).fill(" "); // initialize empty grid
+
+  // Preserve all characters exactly, do not alter them
+  for (let i = 0; i < text.length && i < GRID_SIZE; i++) {
+    chapterGrid[i] = text[i];
+  }
+
+  if (!revealedLetters[currentChapter]) revealedLetters[currentChapter] = new Set();
   revealedCells = new Set();
-  revealedLetters[currentChapter].forEach(letter=>{
-    chapterGrid.forEach((c,i)=>{ if(c.toLowerCase()===letter) revealedCells.add(i); });
+
+  // Pre-reveal letters already guessed
+  revealedLetters[currentChapter].forEach(letter => {
+    chapterGrid.forEach((c, i) => {
+      if (/[a-z]/i.test(c) && c.toLowerCase() === letter) revealedCells.add(i);
+    });
+  });
+}
+
+function buildGrid() {
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+
+  chapterGrid.forEach((ch, i) => {
+    const cell = document.createElement("div");
+    cell.className = "cell";
+
+    const isLetter = /[a-z]/i.test(ch);
+    const lower = isLetter ? ch.toLowerCase() : null;
+
+    // Apply background colors only for letters, space or symbol keys get default
+    cell.style.background = (isLetter ? keyColors[lower] : "#eee") || "#eee";
+
+    if (isLetter && !revealedCells.has(i) && !revealedLetters[currentChapter].has(lower)) {
+      cell.classList.add("hidden");   // hide unrevealed letters
+      cell.textContent = "";          // empty until revealed
+    } else {
+      cell.classList.add("char-visible");
+      cell.textContent = ch;          // show letters, numbers, punctuation, symbols exactly
+    }
+
+    // Clicking a cell attempts to reveal a letter if selected
+    cell.addEventListener("click", () => {
+      if (selectedLetter) handleDrop(selectedLetter, i);
+    });
+
+    grid.appendChild(cell);
   });
 }
 
 function buildKey(){
-  const key = document.getElementById("key");
-  key.innerHTML = "";
-  const lettersInChapter = new Set(chapterGrid.filter(c=>/[a-z]/i.test(c)).map(c=>c.toLowerCase()));
+  const key=document.getElementById("key"); key.innerHTML="";
+  const lettersInChapter=new Set(chapterGrid.filter(c=>/[a-z]/i.test(c)).map(c=>c.toLowerCase()));
   ALPHABET.forEach(letter=>{
-    const sw = document.createElement("div");
-    sw.className = "swatch";
-    sw.dataset.letter = letter;
-    sw.style.background = keyColors[letter] || "#fafafa";
-    if(revealedLetters[currentChapter].has(letter) || !lettersInChapter.has(letter)){
-      sw.classList.add("revealed");
-      sw.textContent = letter.toUpperCase();
+    const sw=document.createElement("div"); sw.className="swatch"; sw.dataset.letter=letter;
+    sw.style.background=keyColors[letter]||"#fafafa";
+    if(revealedLetters[currentChapter].has(letter)||!lettersInChapter.has(letter)){
+      sw.classList.add("revealed"); sw.textContent=letter.toUpperCase();
       revealedLetters[currentChapter].add(letter);
     }
-    sw.addEventListener("click", ()=>{
+    sw.addEventListener("click",()=>{
       if(revealedLetters[currentChapter].has(letter)) return;
-      selectedLetter = letter;
-      highlightKey(letter);
+      selectedLetter=letter; highlightKey(letter);
     });
     key.appendChild(sw);
   });
@@ -603,104 +561,117 @@ function buildKey(){
 
 function highlightKey(letter){
   document.querySelectorAll("#key .swatch").forEach(s=>{
-    if(s.dataset.letter===letter && !revealedLetters[currentChapter].has(letter)){
-      s.classList.add("selected");
-    } else s.classList.remove("selected");
+    if(s.dataset.letter===letter && !revealedLetters[currentChapter].has(letter)) s.classList.add("selected");
+    else s.classList.remove("selected");
   });
 }
-
 function buildGrid(){
-  const grid = document.getElementById("grid");
-  grid.innerHTML = "";
+  const grid=document.getElementById("grid"); grid.innerHTML="";
   chapterGrid.forEach((ch,i)=>{
-    const cell = document.createElement("div");
-    cell.className = "cell";
-    const isLetter = /[a-z]/i.test(ch);
-    const l = isLetter ? ch.toLowerCase() : " ";
-    cell.style.background = keyColors[l] || "#eee";
+    const cell=document.createElement("div"); cell.className="cell";
+    const isLetter=/[a-z]/i.test(ch); const l=isLetter?ch.toLowerCase():" ";
+    cell.style.background=keyColors[l]||"#eee";
     if(isLetter && !revealedCells.has(i) && !revealedLetters[currentChapter].has(l)) cell.classList.add("hidden");
     else cell.classList.add("char-visible");
-    cell.textContent = isLetter ? (revealedCells.has(i) ? ch : "") : ch;
-    cell.addEventListener("click", ()=>{ if(selectedLetter) handleDrop(selectedLetter,i); });
+    cell.textContent=isLetter?(revealedCells.has(i)?ch:""):ch;
+    cell.addEventListener("click",()=>{ if(selectedLetter) handleDrop(selectedLetter,i); });
     grid.appendChild(cell);
   });
 }
 
 function handleDrop(letter,index){
-  const ch = chapterGrid[index];
-  if(!/[a-z]/i.test(ch)) return flash(index);
+  const ch=chapterGrid[index]; if(!/[a-z]/i.test(ch)) return flash(index);
   if(ch.toLowerCase()===letter){
     revealedLetters[currentChapter].add(letter);
     chapterGrid.forEach((c,i)=>{ if(c.toLowerCase()===letter) revealedCells.add(i); });
-    buildGrid();
-    buildKey();
-    updateFound();
-    checkCompletion();
+    buildGrid(); buildKey(); updateFound(); checkCompletion(); saveProgress();
   } else flash(index);
 }
 
-function flash(i){
-  const c = document.getElementById("grid").children[i];
-  if(!c) return;
-  c.classList.add("flash");
-  setTimeout(()=>c.classList.remove("flash"),360);
-}
+function flash(i){ const c=document.getElementById("grid").children[i]; if(!c) return; c.classList.add("flash"); setTimeout(()=>c.classList.remove("flash"),360); }
 
-document.getElementById("hintBtn").addEventListener("click", ()=>{
+document.getElementById("hintBtn").addEventListener("click",()=>{
   if(!selectedLetter) return;
-  let flashed = false;
+  let flashed=false;
   for(let i=0;i<chapterGrid.length;i++){
     if(chapterGrid[i].toLowerCase()===selectedLetter && !revealedCells.has(i)){
-      flashed = true;
-      const c = document.getElementById("grid").children[i];
-      c.classList.add("hint-flash");
-      setTimeout(()=>c.classList.remove("hint-flash"),600);
+      flashed=true; const c=document.getElementById("grid").children[i];
+      c.classList.add("hint-flash"); setTimeout(()=>c.classList.remove("hint-flash"),600);
     }
   }
   if(!flashed){
-    const selected = document.querySelector("#key .swatch.selected");
-    if(selected){ 
-      selected.classList.add("flash"); 
-      setTimeout(()=>selected.classList.remove("flash"),360); 
-    }
+    const selected=document.querySelector("#key .swatch.selected");
+    if(selected){ selected.classList.add("flash"); setTimeout(()=>selected.classList.remove("flash"),360); }
   }
 });
 
 function updateFound(){
-  const lettersInGrid = new Set(chapterGrid.filter(c=>/[a-z]/i.test(c)).map(c=>c.toLowerCase()));
-  const revealedCount = [...revealedLetters[currentChapter]].filter(l=>lettersInGrid.has(l)).length;
-  document.getElementById("foundStatus").textContent = `Revealed: ${revealedCount} / ${lettersInGrid.size}`;
+  const lettersInGrid=new Set(chapterGrid.filter(c=>/[a-z]/i.test(c)).map(c=>c.toLowerCase()));
+  const revealedCount=[...revealedLetters[currentChapter]].filter(l=>lettersInGrid.has(l)).length;
+  document.getElementById("foundStatus").textContent=`Revealed: ${revealedCount} / ${lettersInGrid.size}`;
 }
 
 function checkCompletion(){
-  const lettersInGrid = new Set(chapterGrid.filter(c=>/[a-z]/i.test(c)).map(c=>c.toLowerCase()));
-  const revealedCount = [...revealedLetters[currentChapter]].filter(l=>lettersInGrid.has(l)).length;
-  if(lettersInGrid.size > 0 && revealedCount >= lettersInGrid.size){
-    chapters[currentChapter].solved = true; // <-- mark chapter as solved
-    showCongratsModal();
-    addBottomDownloadButton();
+  const lettersInGrid=new Set(chapterGrid.filter(c=>/[a-z]/i.test(c)).map(c=>c.toLowerCase()));
+  const revealedCount=[...revealedLetters[currentChapter]].filter(l=>lettersInGrid.has(l)).length;
+  if(lettersInGrid.size>0 && revealedCount>=lettersInGrid.size){
+    chapters[currentChapter].solved=true; saveProgress();
+    showCongratsModal(); addBottomDownloadButton();
   }
 }
 
+// ==============================
+// DOWNLOAD FUNCTION
+// ==============================
+function downloadCurrentChapter(){
+  const { jsPDF } = window.jspdf; const doc=new jsPDF();
+  const chapterText=chapters[currentChapter]?.raw||"";
+  const lines=doc.splitTextToSize(chapterText,180); let y=10;
+  doc.setFontSize(12); doc.text(chapters[currentChapter]?.title||`Chapter ${currentChapter+1}`,10,y); y+=10;
+  doc.setFontSize(10);
+  lines.forEach(line=>{
+    if(y>290){ doc.addPage(); y=10; }
+    doc.text(line,10,y); y+=7;
+  });
+  let filename=chapters[currentChapter]?.title||`Chapter_${currentChapter+1}`;
+  filename=filename.normalize('NFKD').replace(/[^\w\s-]/g,'').replace(/\s+/g,'_').trim();
+  if(!filename) filename=`Chapter_${currentChapter+1}`;
+  doc.save(filename+".pdf");
+}
+
+function addBottomDownloadButton(){
+  const container=document.getElementById("bottomDownloadContainer");
+  if(container.querySelector("button")) return;
+  const btn=document.createElement("button"); btn.textContent="Download Chapter"; btn.className="common-btn";
+  btn.addEventListener("click",downloadCurrentChapter); container.appendChild(btn);
+}
+
 function showCongratsModal(){
-  const modal = document.getElementById("congratsModal");
-  modal.style.display = "flex";
-  modal.setAttribute("aria-hidden","false");
+  const modal=document.getElementById("congratsModal"); modal.style.display="flex"; modal.setAttribute("aria-hidden","false");
 }
-
 function hideCongratsModal(){
-  const modal = document.getElementById("congratsModal");
-  modal.style.display = "none";
-  modal.setAttribute("aria-hidden","true");
+  const modal=document.getElementById("congratsModal"); modal.style.display="none"; modal.setAttribute("aria-hidden","true");
 }
 
-// Modal download button
-document.getElementById("downloadChapterBtn").addEventListener("click", downloadCurrentChapter);
+document.getElementById("downloadChapterBtn").addEventListener("click",downloadCurrentChapter);
+document.getElementById("continueBtn").addEventListener("click",()=>{
+  hideCongratsModal(); document.getElementById("bottomDownloadContainer").innerHTML="";
+  if(currentChapter<chapters.length-1){
+    currentChapter++; revealedCells=new Set(); selectedLetter=null;
+    if(!revealedLetters[currentChapter]) revealedLetters[currentChapter]=new Set();
+    populateGrid(); initColors(); updateFound(); saveProgress();
+  }
+});
 
-document.getElementById("continueBtn").addEventListener("click", ()=>{
-  hideCongratsModal();
-  document.getElementById("bottomDownloadContainer").innerHTML = ""; // FORCE HIDE
-
+function initColors(){
+  if(chapters[currentChapter].solved) addBottomDownloadButton();
+  else document.getElementById("bottomDownloadContainer").innerHTML="";
+  document.getElementById("chapterHeading").textContent=chapters[currentChapter].title;
+  const g=generateKey(); vibrantKeyColors=g; keyColors=g.hex;
+  buildKey(); buildGrid();
+}
+  
+  document.getElementById("nextChapter").onclick = () => {
   if(currentChapter < chapters.length - 1){
     currentChapter++;
     revealedCells = new Set();
@@ -709,75 +680,50 @@ document.getElementById("continueBtn").addEventListener("click", ()=>{
     populateGrid();
     initColors();
     updateFound();
-  }
-});
-
-function initColors(){
-  // show download button if chapter already solved
-  if(chapters[currentChapter].solved){
-    addBottomDownloadButton();
-  } else {
-    document.getElementById("bottomDownloadContainer").innerHTML = "";
-  }
-
-  document.getElementById("chapterHeading").textContent = chapters[currentChapter].title;
-  const g = generateKey();
-  vibrantKeyColors = g;
-  keyColors = g.hex;
-  buildKey();
-  buildGrid();
-}
-
-document.getElementById("resetProgress").onclick = ()=>{ initColors(); };
-document.getElementById("nextChapter").onclick = ()=>{
-  if(currentChapter < chapters.length-1){
-    currentChapter++;
-    revealedCells = new Set();
-    selectedLetter = null;
-    if(!revealedLetters[currentChapter]) revealedLetters[currentChapter] = new Set();
-    populateGrid(); 
-    initColors(); 
-    updateFound();
+    saveProgress();
   }
 };
-document.getElementById("prevChapter").onclick = ()=>{
+
+document.getElementById("prevChapter").onclick = () => {
   if(currentChapter > 0){
     currentChapter--;
     revealedCells = new Set();
     selectedLetter = null;
     if(!revealedLetters[currentChapter]) revealedLetters[currentChapter] = new Set();
-    populateGrid(); 
-    initColors(); 
+    populateGrid();
+    initColors();
     updateFound();
+    saveProgress();
   }
 };
 
-document.getElementById("clearProgress").addEventListener("click", ()=>{
+document.getElementById("clearProgress").addEventListener("click", () => {
   if(confirm("Clear all progress? This cannot be undone.")){
     revealedLetters = {};
     revealedCells = new Set();
     currentChapter = 0;
-    chapters.forEach(ch => ch.solved = false); // reset solved flags
+    chapters.forEach(ch => ch.solved = false);
+    localStorage.removeItem("schoolhoodPuzzleProgress");
     document.getElementById("bottomDownloadContainer").innerHTML = "";
     populateGrid();
     initColors();
     updateFound();
   }
 });
-
-document.addEventListener("DOMContentLoaded", ()=>{
+// ==============================
+// INITIALIZATION
+// ==============================
+document.addEventListener("DOMContentLoaded", () => {
+  loadProgress();
   populateGrid();
   initColors();
   updateFound();
-    // Color Shift / Change Colours button
+
   const colorShiftBtn = document.getElementById("colorShiftBtn");
   if(colorShiftBtn){
     colorShiftBtn.addEventListener("click", changeKeyColors);
   }
 });
-
 </script>
 </body>
 </html>
-
-
